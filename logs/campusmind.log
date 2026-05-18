@@ -1,0 +1,135 @@
+2026-05-18 13:20:02 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 13:20:05 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 13:20:05 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=c202a44c-bc03-4907-9bde-75b5b491858c
+2026-05-18 13:20:05 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 13:23:51 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 13:23:52 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 13:23:52 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=1e932580-c359-40e1-b9c4-90824628b9bd
+2026-05-18 13:23:52 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 13:26:30 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 13:26:31 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 13:26:31 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=0e3aba48-f253-4054-9297-131779054cbf
+2026-05-18 13:26:31 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 13:26:34 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 13:26:34 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3-8b-instruct:free @ 0.70
+2026-05-18 13:26:42 | ERROR    | campusmind.app.controllers | Chat error: Error code: 404 - {'error': {'message': 'No endpoints found for meta-llama/llama-3-8b-instruct:free.', 'code': 404}, 'user_id': 'user_3D5PXGfncG8h9HOFDWtuANdJYtE'}
+2026-05-18 13:30:14 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 13:30:16 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 13:30:16 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=a8a6bcb0-9b95-408e-b6ce-a66c7d17a2f9
+2026-05-18 13:30:16 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 13:30:18 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 13:30:18 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 13:30:25 | ERROR    | campusmind.app.controllers | Chat error: Error code: 404 - {'error': {'message': 'No endpoints found for meta-llama/llama-3.1-8b-instruct:free.', 'code': 404}, 'user_id': 'user_3D5PXGfncG8h9HOFDWtuANdJYtE'}
+2026-05-18 13:30:41 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:30:41 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:30:41 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:30:41 | ERROR    | campusmind.app.controllers | Agent error (academic): Error code: 404 - {'error': {'message': 'No endpoints found for meta-llama/llama-3.1-8b-instruct:free.', 'code': 404}, 'user_id': 'user_3D5PXGfncG8h9HOFDWtuANdJYtE'}
+2026-05-18 13:30:49 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-70b-instruct @ 0.70
+2026-05-18 13:30:53 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:30:53 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:30:53 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:31:20 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:31:20 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:31:20 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:32:00 | INFO     | campusmind.rag.document_loader | Loading document: taller tigger.docx (type=docx)
+2026-05-18 13:32:00 | INFO     | campusmind.rag.document_loader | Loaded 1 chunks from taller tigger.docx
+2026-05-18 13:32:00 | INFO     | campusmind.rag.splitter | Split 1 docs → 2 chunks
+2026-05-18 13:32:02 | INFO     | campusmind.embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-18 13:32:03 | INFO     | campusmind.vectorstore.chroma_manager | ChromaDB store created/loaded from campusmind_data\chroma
+2026-05-18 13:32:09 | INFO     | campusmind.vectorstore.chroma_manager | Added 2 documents to ChromaDB
+2026-05-18 13:32:09 | INFO     | campusmind.rag.rag_pipeline | Ingested 'taller tigger.docx' → 2 chunks
+2026-05-18 13:32:09 | INFO     | campusmind.ui.upload_interface | Ingested document: taller tigger.docx
+2026-05-18 13:32:36 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:32:36 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:32:36 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:33:19 | INFO     | campusmind.app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-18 13:33:49 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:33:49 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:33:49 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:34:23 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:34:23 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:34:23 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:36:45 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:36:45 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:36:45 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:37:26 | INFO     | campusmind.tools.report_tool | PDF generated: 13434 bytes
+2026-05-18 13:37:54 | INFO     | campusmind.tools.report_tool | PDF generated: 13434 bytes
+2026-05-18 13:37:54 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 13:37:54 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 13:37:54 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 13:38:01 | INFO     | campusmind.tools.report_tool | PDF generated: 14267 bytes
+2026-05-18 13:38:10 | INFO     | campusmind.tools.report_tool | PDF generated: 14267 bytes
+2026-05-18 14:31:25 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 14:31:27 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:31:27 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=bf3e0c4f-2780-48d7-a5ca-2d7dee2fa213
+2026-05-18 14:31:27 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 14:31:29 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:31:29 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:31:35 | INFO     | campusmind.app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-18 14:33:32 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 14:33:33 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:33:33 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=b45c8982-1ebe-4035-9de1-4f9bffaaa9da
+2026-05-18 14:33:33 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 14:33:36 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:33:36 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:33:49 | INFO     | campusmind.app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-18 14:34:41 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 14:34:43 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:34:43 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=cfb9d88f-60fa-46ab-88cd-198221968245
+2026-05-18 14:34:43 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 14:34:45 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:34:45 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:39:18 | INFO     | campusmind.llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-18 14:39:20 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:39:20 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=63d525a6-5dbd-44ad-bf4e-0934b71ab72e
+2026-05-18 14:39:20 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 14:39:22 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:39:22 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:39:30 | INFO     | campusmind.app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-18 14:40:25 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 14:40:25 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 14:40:25 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 14:41:05 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 14:41:05 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 14:41:05 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 14:41:51 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 14:41:51 | INFO     | campusmind.agents.academic_agent | AcademicAgent initialised
+2026-05-18 14:41:51 | INFO     | campusmind.agents.agent_manager | Created agent: academic
+2026-05-18 14:41:59 | INFO     | campusmind.tools.report_tool | PDF generated: 5339 bytes
+2026-05-18 14:42:29 | WARNING  | campusmind.vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-18 14:42:29 | WARNING  | campusmind.vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-18 14:42:32 | INFO     | campusmind.vision.image_captioning | LLM caption generated (645 chars)
+2026-05-18 14:43:37 | INFO     | campusmind.rag.document_loader | Loading document: justificacion_problema.pdf (type=pdf)
+2026-05-18 14:43:38 | INFO     | campusmind.rag.document_loader | Loaded 2 chunks from justificacion_problema.pdf
+2026-05-18 14:43:38 | INFO     | campusmind.rag.splitter | Split 2 docs → 5 chunks
+2026-05-18 14:43:39 | INFO     | campusmind.embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-18 14:43:40 | INFO     | campusmind.vectorstore.chroma_manager | ChromaDB store created/loaded from campusmind_data\chroma
+2026-05-18 14:43:41 | INFO     | campusmind.vectorstore.chroma_manager | Added 5 documents to ChromaDB
+2026-05-18 14:43:41 | INFO     | campusmind.rag.rag_pipeline | Ingested 'justificacion_problema.pdf' → 5 chunks
+2026-05-18 14:43:41 | INFO     | campusmind.ui.upload_interface | Ingested document: justificacion_problema.pdf
+2026-05-18 14:44:17 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 14:44:17 | INFO     | campusmind.agents.research_agent | ResearchAgent initialised
+2026-05-18 14:44:17 | INFO     | campusmind.agents.agent_manager | Created agent: research
+2026-05-18 14:45:09 | INFO     | campusmind.agents.agent_manager | AgentManager initialised
+2026-05-18 14:45:09 | INFO     | campusmind.agents.research_agent | ResearchAgent initialised
+2026-05-18 14:45:09 | INFO     | campusmind.agents.agent_manager | Created agent: research
+2026-05-18 14:45:50 | INFO     | campusmind.rag.document_loader | Loading document: Administracion Estrategica L. Hill.pdf (type=pdf)
+2026-05-18 14:47:35 | INFO     | campusmind.rag.document_loader | Loaded 796 chunks from Administracion Estrategica L. Hill.pdf
+2026-05-18 14:47:35 | INFO     | campusmind.rag.splitter | Split 796 docs → 4544 chunks
+2026-05-18 14:53:31 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:53:32 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=a022a9d6-78dd-44aa-9359-2d81ba4e73f6
+2026-05-18 14:53:32 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:53:32 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:53:41 | INFO     | campusmind.app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-18 14:53:55 | INFO     | campusmind.rag.document_loader | Loading document: Administracion Estrategica L. Hill.pdf (type=pdf)
+2026-05-18 14:55:31 | INFO     | campusmind.rag.document_loader | Loading document: Administracion Estrategica L. Hill.pdf (type=pdf)
+2026-05-18 14:55:40 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 14:55:40 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=c802b038-9dbe-478d-a4ac-15e99c2c78d7
+2026-05-18 14:55:40 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 14:55:40 | INFO     | campusmind.app.controllers | Model updated: meta-llama/llama-3.1-8b-instruct:free @ 0.70
+2026-05-18 14:58:46 | INFO     | campusmind.rag.document_loader | Loaded 796 chunks from Administracion Estrategica L. Hill.pdf
+2026-05-18 14:58:46 | INFO     | campusmind.rag.splitter | Split 796 docs → 4544 chunks
+2026-05-18 15:00:27 | INFO     | campusmind.vectorstore.chroma_manager | Added 4544 documents to ChromaDB
+2026-05-18 15:00:27 | INFO     | campusmind.rag.rag_pipeline | Ingested 'Administracion Estrategica L. Hill.pdf' → 4544 chunks
+2026-05-18 15:01:07 | INFO     | campusmind.rag.document_loader | Loaded 796 chunks from Administracion Estrategica L. Hill.pdf
+2026-05-18 15:01:07 | INFO     | campusmind.rag.splitter | Split 796 docs → 4544 chunks

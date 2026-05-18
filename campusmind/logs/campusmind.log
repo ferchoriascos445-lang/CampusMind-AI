@@ -1,0 +1,14 @@
+2026-05-18 12:23:14 | INFO     | campusmind.llm.groq_client | Initialising GroqClient singleton
+2026-05-18 12:23:18 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 12:23:18 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=6616d83c-ff89-455d-aefa-02150b7abb47
+2026-05-18 12:23:18 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 12:23:19 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 12:23:39 | ERROR    | campusmind.app.controllers | Chat error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+2026-05-18 12:23:51 | INFO     | campusmind.app.controllers | Model updated: mixtral-8x7b-32768 @ 0.70
+2026-05-18 12:23:54 | ERROR    | campusmind.app.controllers | Chat error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+2026-05-18 12:40:28 | INFO     | campusmind.llm.groq_client | Initialising GroqClient singleton
+2026-05-18 12:40:30 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-18 12:40:30 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=172c9248-9016-43b1-8790-02e0f625c69c
+2026-05-18 12:40:30 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-18 12:40:31 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
+2026-05-18 12:40:45 | ERROR    | campusmind.app.controllers | Chat error: Error code: 400 - {'error': {'message': 'The model `llama3-70b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
