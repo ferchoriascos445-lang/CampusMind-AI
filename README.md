@@ -1,6 +1,6 @@
 # CampusMind AI 🎓
 
-**An intelligent multimodal university assistant powered by Groq LLMs, LangChain, and ChromaDB.**
+**An intelligent multimodal university assistant powered by OpenRouter, OpenAI models, LangChain, and ChromaDB.**
 
 ---
 
@@ -19,111 +19,231 @@ CampusMind AI is a private, enterprise-grade AI assistant for universities. It p
 
 ---
 
+# Features
+
+- Multi-agent AI architecture
+- Retrieval-Augmented Generation (RAG)
+- Persistent memory with SQLite
+- OCR and image understanding
+- Multimodal AI assistant
+- Vector search using ChromaDB
+- Streamlit web interface
+- PDF, DOCX, TXT, and Markdown export
+- Modular and scalable architecture
+- Enterprise-grade design patterns
+
+---
+
 ## Quick Start
 
-### 1. Set your API key
+### 1. Clone repository
 
 ```bash
-export GROQ_API_KEY=your_key_here
+git clone https://github.com/ferchoriascos445-lang/CampusMind-AI.git
+cd CampusMind-AI
 ```
 
-Get a free key at https://console.groq.com
+---
 
-### 2. Install dependencies
+### 2. Create virtual environment
+
+#### Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+#### Linux / Mac
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+### 3. Install dependencies
 
 ```bash
 pip install -r campusmind/requirements.txt
 ```
 
-### 3. Launch
+---
+
+### 4. Configure environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+OPENROUTER_API_KEY=your_api_key
+DEFAULT_MODEL=openai/gpt-4o
+DEFAULT_TEMPERATURE=0.7
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+RETRIEVAL_K=4
+```
+
+Get your API key from:
+
+https://openrouter.ai
+
+---
+
+### 5. Launch application
 
 ```bash
-python -m streamlit run campusmind/ui/streamlit_ui.py \
-  --server.port 8080 --server.address 0.0.0.0 --server.headless true
+streamlit run campusmind/ui/streamlit_ui.py \
+--server.port 8080 \
+--server.address 0.0.0.0 \
+--server.headless true
+```
+
+Open in browser:
+
+```text
+http://localhost:8080
 ```
 
 ---
 
-## Architecture
+# System Architecture
 
-```
+```text
 campusmind/
-├── app/           ← Bootstrap, routes, controllers
-├── llm/           ← Groq client, LLM factory, prompts, chains
-├── rag/           ← Document loader, splitter, retriever, pipeline
-├── embeddings/    ← Embedding manager (HuggingFace / ChromaDB default)
-├── vectorstore/   ← ChromaDB manager, vector factory
-├── agents/        ← Academic, Research, Vision agents + manager
-├── memory/        ← ChatMemory (in-session) + PersistentMemory (SQLite)
-├── tools/         ← OCR, image, document, report, search tools
-├── vision/        ← OCR engine, image analysis, captioning
-├── ui/            ← Streamlit sidebar, chat, upload interfaces
-├── config/        ← Settings (env vars), constants, logger
-├── database/      ← SQLite manager for history persistence
-├── tests/         ← Smoke tests
-└── main.py        ← Entry point
+├── app/               # Bootstrap, routes, controllers
+├── llm/               # OpenRouter client, prompts, chains
+├── rag/               # RAG pipeline and retrievers
+├── embeddings/        # Embedding manager
+├── vectorstore/       # ChromaDB integration
+├── agents/            # Academic, Research, Vision agents
+├── memory/            # Persistent and session memory
+├── tools/             # OCR, image, search, reports
+├── vision/            # OCR and image processing
+├── ui/                # Streamlit interface
+├── config/            # Settings and logger
+├── database/          # SQLite manager
+├── tests/             # Unit and smoke tests
+└── main.py            # Application entry point
 ```
-
-### Design Patterns Used
-
-- **Singleton** — `GroqClient`, `EmbeddingManager`, `ChromaManager`
-- **Factory** — `LLMFactory`, `VectorStoreFactory`, `AgentManager`
-- **Strategy** — Swappable LLM backends, vector store backends
-- **Adapter** — `OCRTool`, `ImageTool`, `SearchTool` wrap domain objects
-- **Observer** — `PersistentMemory` listens to conversation events
-- **Facade** — `MemoryManager`, `RAGPipeline` unify complex subsystems
-- **LCEL Chains** — LangChain Expression Language for composable pipelines
 
 ---
 
-## RAG System
+# Design Patterns Used
 
-**Ingest path:**
-```
-File upload → DocumentLoader → DocumentSplitter → EmbeddingManager → ChromaDB
-```
-
-**Query path:**
-```
-User query → DocumentRetriever → format_context → RAG chain (Groq LLM) → Response
-```
-
-Supported file types: `PDF`, `TXT`, `DOCX`, `CSV`, `MD`
+| Pattern | Usage |
+|---|---|
+| Singleton | OpenRouter client, embedding manager |
+| Factory | LLM and vector store creation |
+| Strategy | Swappable LLM providers |
+| Adapter | OCR and search tool wrappers |
+| Observer | Persistent memory event listeners |
+| Facade | MemoryManager and RAGPipeline |
+| LCEL | LangChain composable chains |
 
 ---
 
-## Available LLM Models (Groq)
+# RAG Pipeline
 
-| Model | Context | Best For |
+## Document Ingestion
+
+```text
+File Upload
+   ↓
+Document Loader
+   ↓
+Document Splitter
+   ↓
+Embedding Manager
+   ↓
+ChromaDB Vector Store
+```
+
+---
+
+## Query Flow
+
+```text
+User Question
+   ↓
+Retriever
+   ↓
+Context Formatter
+   ↓
+LLM Chain
+   ↓
+AI Response
+```
+
+---
+
+# Supported File Types
+
+- PDF
+- DOCX
+- TXT
+- CSV
+- Markdown
+
+---
+
+# Available Models
+
+| Model | Provider | Best Use |
 |---|---|---|
-| `llama3-70b-8192` | 8K tokens | General tasks, reasoning |
-| `mixtral-8x7b-32768` | 32K tokens | Long documents, analysis |
-| `llama3-8b-8192` | 8K tokens | Fast responses |
+| openai/gpt-4o | OpenAI | Multimodal reasoning |
+| openai/gpt-4.1 | OpenAI | Coding and analysis |
+| openai/gpt-4.1-mini | OpenAI | Fast responses |
+| openai/gpt-3.5-turbo | OpenAI | Lightweight tasks |
 
 ---
 
-## Agents
+# Agents
 
-### AcademicAgent
-Specialised in: essay structure, APA/MLA/Chicago citations, subject-matter Q&A, concept explanations.
+## AcademicAgent
 
-### ResearchAgent
-Specialised in: research methodology, hypothesis design, literature synthesis, statistical interpretation.
+Capabilities:
 
-### VisionAgent
-Specialised in: interpreting OCR output, describing image content, analysing extracted text.
-
----
-
-## Memory System
-
-- **In-session**: `ChatMessageHistory` (LangChain) — fast, in-memory
-- **Persistent**: SQLite via `SQLiteManager` — survives restarts
-- **Session recovery**: Past conversations recoverable by session ID
+- Essay generation
+- Citation formatting
+- Concept explanations
+- Subject tutoring
 
 ---
 
-## Export Formats
+## ResearchAgent
+
+Capabilities:
+
+- Research methodologies
+- Literature review synthesis
+- Statistical interpretation
+- Hypothesis generation
+
+---
+
+## VisionAgent
+
+Capabilities:
+
+- OCR extraction
+- Image understanding
+- Screenshot analysis
+- Multimodal reasoning
+
+---
+
+# Memory System
+
+| Type | Description |
+|---|---|
+| Session Memory | LangChain ChatMessageHistory |
+| Persistent Memory | SQLite database |
+| Session Recovery | Restore previous conversations |
+
+---
+
+# Export Formats
 
 | Format | Library |
 |---|---|
@@ -134,48 +254,100 @@ Specialised in: interpreting OCR output, describing image content, analysing ext
 
 ---
 
-## Configuration (`.env`)
+# Tech Stack
 
-```env
-GROQ_API_KEY=your_key
-DEFAULT_MODEL=llama3-70b-8192
-DEFAULT_TEMPERATURE=0.7
-CHUNK_SIZE=1000
-CHUNK_OVERLAP=200
-RETRIEVAL_K=4
-```
-
-Copy `.env.example` to `.env` and fill in your values.
+| Technology | Usage |
+|---|---|
+| OpenRouter | LLM provider |
+| OpenAI Models | GPT-4o, GPT-4.1 |
+| LangChain | AI orchestration |
+| LCEL | Chain composition |
+| ChromaDB | Vector database |
+| SQLite | Persistent memory |
+| Streamlit | Web UI |
+| Pillow | Image processing |
+| pytesseract | OCR |
+| reportlab | PDF generation |
 
 ---
 
-## Docker
+# Docker Support
+
+## Build and run
 
 ```bash
 docker-compose up --build
 ```
 
-The app will be available at `http://localhost:8080`.
-
 ---
 
-## Troubleshooting
+# Troubleshooting
 
 | Issue | Solution |
 |---|---|
-| `GROQ_API_KEY not set` | Add key to `.env` or environment secrets |
-| ChromaDB slow first run | Embeddings download on first use |
-| OCR not working | Install tesseract: `apt install tesseract-ocr` |
-| Disk quota error | Skip `faiss-cpu` and `sentence-transformers` |
+| OPENROUTER_API_KEY not set | Configure `.env` correctly |
+| OCR not working | Install `tesseract-ocr` |
+| Slow first startup | Embeddings download initially |
+| Streamlit not found | Activate virtual environment |
 
 ---
 
-## Tech Stack
+# Security Notes
 
-- **LLM**: Groq (llama3-70b, mixtral-8x7b)
-- **Orchestration**: LangChain + LCEL
-- **Vector DB**: ChromaDB
-- **UI**: Streamlit
-- **DB**: SQLite (via SQLAlchemy-compatible manager)
-- **Documents**: pypdf, python-docx, reportlab
-- **Vision**: Pillow, pytesseract (optional)
+- Never upload `.env`
+- Always add `.env` to `.gitignore`
+- Rotate exposed API keys immediately
+- Use environment variables for secrets
+
+---
+
+# Future Improvements
+
+- Multi-user authentication
+- Voice assistant support
+- Fine-tuned university models
+- Advanced analytics dashboard
+- Hybrid vector databases
+- Real-time collaboration
+- Agent orchestration system
+
+---
+
+# License
+
+MIT License
+
+---
+
+# Author
+
+Carlos Fernando Paredes Riascos
+
+---
+
+# Screenshots
+
+_Add application screenshots here_
+
+---
+
+# Contributing
+
+Pull requests and contributions are welcome.
+
+1. Fork repository
+2. Create feature branch
+3. Commit changes
+4. Push branch
+5. Open Pull Request
+
+---
+
+# Acknowledgments
+
+- OpenRouter
+- OpenAI
+- LangChain
+- ChromaDB
+- Streamlit
+- Python community
