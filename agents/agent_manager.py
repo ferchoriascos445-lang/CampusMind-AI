@@ -3,12 +3,12 @@ agent_manager.py — Factory + registry for all AI agents (Factory + Observer pa
 """
 from __future__ import annotations
 
-from campusmind.agents.academic_agent import AcademicAgent
-from campusmind.agents.research_agent import ResearchAgent
-from campusmind.agents.vision_agent import VisionAgent
-from campusmind.config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
-from campusmind.config.logger import get_logger
-from campusmind.llm.llm_factory import LLMFactory
+from agents.academic_agent import AcademicAgent
+from agents.research_agent import ResearchAgent
+from agents.vision_agent import VisionAgent
+from config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
+from config.logger import get_logger
+from llm.llm_factory import LLMFactory
 
 logger = get_logger(__name__)
 

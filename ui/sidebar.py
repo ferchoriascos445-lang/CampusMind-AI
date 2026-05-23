@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from campusmind.config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
-from campusmind.config.settings import settings
+from config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
+from config.settings import settings
 
 
 def render_sidebar() -> dict:

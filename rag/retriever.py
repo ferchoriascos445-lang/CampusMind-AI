@@ -7,10 +7,10 @@ from typing import List
 
 from langchain_core.documents import Document
 
-from campusmind.config.logger import get_logger
-from campusmind.config.settings import settings
-from campusmind.embeddings.embedding_manager import EmbeddingManager
-from campusmind.vectorstore.vector_factory import VectorStoreFactory
+from config.logger import get_logger
+from config.settings import settings
+from embeddings.embedding_manager import EmbeddingManager
+from vectorstore.vector_factory import VectorStoreFactory
 
 logger = get_logger(__name__)
 _em = EmbeddingManager()

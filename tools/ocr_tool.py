@@ -3,8 +3,8 @@ ocr_tool.py — LangChain-compatible tool wrapper for OCR.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
-from campusmind.vision.ocr_engine import OCREngine
+from config.logger import get_logger
+from vision.ocr_engine import OCREngine
 
 logger = get_logger(__name__)
 

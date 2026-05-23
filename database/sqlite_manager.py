@@ -7,7 +7,7 @@ import sqlite3
 from pathlib import Path
 from typing import List
 
-from campusmind.config.logger import get_logger
+from config.logger import get_logger
 
 logger = get_logger(__name__)
 

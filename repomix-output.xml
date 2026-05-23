@@ -1,0 +1,3858 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+__init__.py
+.gitignore
+agents/__init__.py
+agents/academic_agent.py
+agents/agent_manager.py
+agents/research_agent.py
+agents/vision_agent.py
+app/__init__.py
+app/app.py
+app/controllers.py
+app/routes.py
+campusmind_data/chroma/cd163ee3-dc3b-49a8-afdf-d03234e6134e/data_level0.bin
+campusmind_data/chroma/cd163ee3-dc3b-49a8-afdf-d03234e6134e/header.bin
+campusmind_data/chroma/cd163ee3-dc3b-49a8-afdf-d03234e6134e/length.bin
+campusmind_data/chroma/cd163ee3-dc3b-49a8-afdf-d03234e6134e/link_lists.bin
+campusmind_data/chroma/chroma.sqlite3
+campusmind_data/history.db
+config/__init__.py
+config/constants.py
+config/logger.py
+config/settings.py
+database/__init__.py
+database/sqlite_manager.py
+docker-compose.yml
+embeddings/__init__.py
+embeddings/embedding_manager.py
+embeddings/models.py
+llm/__init__.py
+llm/chains.py
+llm/llm_factory.py
+llm/openrouter_client.py
+llm/prompts.py
+main.py
+memory/__init__.py
+memory/chat_memory.py
+memory/memory_manager.py
+memory/persistent_memory.py
+rag/__init__.py
+rag/document_loader.py
+rag/query_engine.py
+rag/rag_pipeline.py
+rag/retriever.py
+rag/splitter.py
+README.md
+requirements.txt
+start.sh
+tests/__init__.py
+tests/test_smoke.py
+tools/__init__.py
+tools/document_tool.py
+tools/image_tool.py
+tools/ocr_tool.py
+tools/report_tool.py
+tools/search_tool.py
+ui/__init__.py
+ui/chat_interface.py
+ui/sidebar.py
+ui/streamlit_ui.py
+ui/upload_interface.py
+vectorstore/__init__.py
+vectorstore/chroma_manager.py
+vectorstore/vector_factory.py
+vision/__init__.py
+vision/image_analysis.py
+vision/image_captioning.py
+vision/ocr_engine.py
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="__init__.py">
+"""
+CampusMind AI — Intelligent University Assistant.
+"""
+__version__ = "1.0.0"
+</file>
+
+<file path=".gitignore">
+.env
+</file>
+
+<file path="agents/__init__.py">
+
+</file>
+
+<file path="agents/academic_agent.py">
+"""
+academic_agent.py — Academic Agent for university-level academic tasks.
+"""
+from __future__ import annotations
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.output_parsers import StrOutputParser
+
+from config.logger import get_logger
+from llm.prompts import ACADEMIC_PROMPT
+
+logger = get_logger(__name__)
+
+
+class AcademicAgent:
+    """
+    Specialised agent for academic tasks: essay help, citations,
+    concept explanation, and subject-specific Q&A.
+    """
+
+    name = "AcademicAgent"
+    description = "Expert in academic writing, citations, and subject-matter explanation."
+
+    def __init__(self, llm: BaseChatModel) -> None:
+        self._chain = ACADEMIC_PROMPT | llm | StrOutputParser()
+        logger.info("AcademicAgent initialised")
+
+    def run(self, query: str, chat_history: list | None = None) -> str:
+        """
+        Process an academic query.
+
+        Args:
+            query: User's academic question or task.
+            chat_history: Previous messages for context.
+
+        Returns:
+            Agent response string.
+        """
+        logger.debug("AcademicAgent query: %s…", query[:60])
+        return self._chain.invoke({
+            "input": query,
+            "chat_history": chat_history or [],
+        })
+</file>
+
+<file path="agents/agent_manager.py">
+"""
+agent_manager.py — Factory + registry for all AI agents (Factory + Observer pattern).
+"""
+from __future__ import annotations
+
+from agents.academic_agent import AcademicAgent
+from agents.research_agent import ResearchAgent
+from agents.vision_agent import VisionAgent
+from config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
+from config.logger import get_logger
+from llm.llm_factory import LLMFactory
+
+logger = get_logger(__name__)
+
+_AGENT_MAP = {
+    AGENT_ACADEMIC: AcademicAgent,
+    AGENT_RESEARCH: ResearchAgent,
+    AGENT_VISION: VisionAgent,
+}
+
+
+class AgentManager:
+    """
+    Creates and caches agent instances.
+    Agents share the same LLM but have distinct prompts and tools.
+    """
+
+    def __init__(
+        self,
+        model: str | None = None,
+        temperature: float | None = None,
+    ) -> None:
+        self._llm = LLMFactory.create(model=model, temperature=temperature)
+        self._cache: dict = {}
+        logger.info("AgentManager initialised")
+
+    def get_agent(self, agent_type: str):
+        """
+        Return the requested agent, creating it if necessary.
+
+        Args:
+            agent_type: One of 'academic', 'research', 'vision'.
+
+        Returns:
+            Agent instance.
+
+        Raises:
+            ValueError: For unknown agent types.
+        """
+        if agent_type not in _AGENT_MAP:
+            raise ValueError(f"Unknown agent type: '{agent_type}'")
+
+        if agent_type not in self._cache:
+            cls = _AGENT_MAP[agent_type]
+            self._cache[agent_type] = cls(self._llm)
+            logger.info("Created agent: %s", agent_type)
+
+        return self._cache[agent_type]
+
+    @staticmethod
+    def available_agents() -> list[dict]:
+        """Return metadata about all available agents."""
+        return [
+            {
+                "type": AGENT_ACADEMIC,
+                "name": "Academic Agent",
+                "description": "Essay help, citations, concept explanation",
+            },
+            {
+                "type": AGENT_RESEARCH,
+                "name": "Research Agent",
+                "description": "Methodology, literature review, data analysis",
+            },
+            {
+                "type": AGENT_VISION,
+                "name": "Vision Agent",
+                "description": "OCR interpretation and image analysis",
+            },
+        ]
+</file>
+
+<file path="agents/research_agent.py">
+"""
+research_agent.py — Research Agent for academic research methodology.
+"""
+from __future__ import annotations
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.output_parsers import StrOutputParser
+
+from config.logger import get_logger
+from llm.prompts import RESEARCH_PROMPT
+
+logger = get_logger(__name__)
+
+
+class ResearchAgent:
+    """
+    Specialised agent for research tasks: methodology, literature review,
+    data analysis interpretation, and scientific writing.
+    """
+
+    name = "ResearchAgent"
+    description = "Expert in research methodology, literature review, and data analysis."
+
+    def __init__(self, llm: BaseChatModel) -> None:
+        self._chain = RESEARCH_PROMPT | llm | StrOutputParser()
+        logger.info("ResearchAgent initialised")
+
+    def run(self, query: str, chat_history: list | None = None) -> str:
+        """
+        Process a research-related query.
+
+        Args:
+            query: Research question or methodology task.
+            chat_history: Previous messages for context.
+
+        Returns:
+            Agent response string.
+        """
+        logger.debug("ResearchAgent query: %s…", query[:60])
+        return self._chain.invoke({
+            "input": query,
+            "chat_history": chat_history or [],
+        })
+</file>
+
+<file path="agents/vision_agent.py">
+"""
+vision_agent.py — Vision Agent for image analysis and OCR interpretation.
+"""
+from __future__ import annotations
+import base64
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import HumanMessage
+from langchain_core.output_parsers import StrOutputParser
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+class VisionAgent:
+    name = "VisionAgent"
+    description = "Interprets images and OCR text."
+
+    def __init__(self, llm: BaseChatModel) -> None:
+        self._llm = llm
+        self._parser = StrOutputParser()
+        logger.info("VisionAgent initialised")
+
+    def run(
+        self,
+        query: str,
+        ocr_text: str = "",
+        image_bytes: bytes | None = None,
+        chat_history: list | None = None,
+    ) -> str:
+        # Si tenemos imagen, la enviamos directamente al LLM
+        if image_bytes:
+            try:
+                b64 = base64.b64encode(image_bytes).decode("utf-8")
+                message = HumanMessage(content=[
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    },
+                    {"type": "text", "text": query},
+                ])
+                response = self._llm.invoke([message])
+                return self._parser.invoke(response)
+            except Exception as exc:
+                logger.warning("Multimodal failed: %s", exc)
+
+        # Fallback: solo texto OCR
+        combined = query
+        if ocr_text:
+            combined = f"OCR text:\n{ocr_text}\n\nQuestion: {query}"
+        response = self._llm.invoke(combined)
+        return self._parser.invoke(response)
+</file>
+
+<file path="app/__init__.py">
+
+</file>
+
+<file path="app/app.py">
+"""
+app.py — Application factory and bootstrap logic.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+
+def bootstrap() -> None:
+    """
+    Create required directories and validate configuration on startup.
+    Call this once before launching the Streamlit server.
+    """
+    dirs = [
+        settings.UPLOADS_DIR,
+        settings.OUTPUTS_DIR,
+        settings.LOGS_DIR,
+        settings.CHROMA_PERSIST_DIR,
+        Path(settings.SQLITE_DB_PATH).parent,
+    ]
+    for d in dirs:
+        Path(d).mkdir(parents=True, exist_ok=True)
+
+    settings.validate()
+    logger.info(
+        "CampusMind AI %s bootstrap complete. Model=%s",
+        settings.APP_VERSION,
+        settings.DEFAULT_MODEL,
+    )
+
+
+def create_app():
+    """
+    Application factory.
+
+    Returns:
+        Configured application context (dict) ready for use.
+    """
+    bootstrap()
+    return {
+        "app_name": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "model": settings.DEFAULT_MODEL,
+    }
+</file>
+
+<file path="app/controllers.py">
+"""
+controllers.py — Business logic controllers used by the Streamlit app.
+"""
+
+from __future__ import annotations
+
+from config.logger import get_logger
+from config.settings import settings
+from llm.chains import (
+    build_chat_chain,
+    build_rag_chain,
+    build_summarise_chain,
+)
+from llm.llm_factory import LLMFactory
+from memory.memory_manager import MemoryManager
+from rag.rag_pipeline import RAGPipeline
+
+logger = get_logger(__name__)
+
+
+class ChatController:
+    """
+    Handles all LLM interaction:
+    - Plain chat
+    - RAG chat
+    - Summarisation
+    - Agents
+    """
+
+    def __init__(
+        self,
+        memory: MemoryManager,
+        rag: RAGPipeline,
+        model: str | None = None,
+        temperature: float | None = None,
+    ) -> None:
+
+        self._memory = memory
+        self._rag = rag
+
+        self._model = model or settings.DEFAULT_MODEL
+
+        self._temperature = (
+            temperature
+            if temperature is not None
+            else settings.DEFAULT_TEMPERATURE
+        )
+
+        self._llm = LLMFactory.create(
+            model=self._model,
+            temperature=self._temperature,
+        )
+
+        self._chat_chain = build_chat_chain(self._llm)
+        self._rag_chain = build_rag_chain(self._llm)
+        self._summarise_chain = build_summarise_chain(self._llm)
+
+        logger.info(
+            "ChatController initialised: model=%s temp=%.2f",
+            self._model,
+            self._temperature,
+        )
+
+    def update_model(self, model: str, temperature: float) -> None:
+        """Hot-swap the LLM without losing memory."""
+
+        self._model = model
+        self._temperature = temperature
+
+        self._llm = LLMFactory.create(
+            model=model,
+            temperature=temperature,
+        )
+
+        self._chat_chain = build_chat_chain(self._llm)
+        self._rag_chain = build_rag_chain(self._llm)
+        self._summarise_chain = build_summarise_chain(self._llm)
+
+        logger.info(
+            "Model updated: %s @ %.2f",
+            model,
+            temperature,
+        )
+
+    def chat(self, user_input: str, use_rag: bool = False) -> str:
+        """
+        Send a message and get an AI response.
+        """
+
+        self._memory.add_user(user_input)
+
+        chat_history = self._memory.get_chat_messages()[:-1]
+
+        try:
+
+            if use_rag and self._rag.ingested_files:
+
+                context = self._rag.get_context(user_input)
+
+                response = self._rag_chain.invoke(
+                    {
+                        "input": user_input,
+                        "chat_history": chat_history,
+                        "context": context,
+                    }
+                )
+
+            else:
+
+                response = self._chat_chain.invoke(
+                    {
+                        "input": user_input,
+                        "chat_history": chat_history,
+                    }
+                )
+
+        except Exception as exc:
+
+            logger.error("Chat error: %s", exc)
+
+            response = f"Error generating response: {exc}"
+
+        self._memory.add_ai(response)
+
+        return response
+
+    def summarise(self, document_text: str) -> str:
+        """Summarise a document using the LLM."""
+
+        try:
+
+            return self._summarise_chain.invoke(
+                {"document_text": document_text}
+            )
+
+        except Exception as exc:
+
+            logger.error("Summarise error: %s", exc)
+
+            return f"Summarisation error: {exc}"
+
+    def run_agent(
+        self,
+        agent_type: str,
+        user_input: str,
+        ocr_text: str = "",
+        image_bytes: bytes | None = None,
+    ) -> str:
+        """
+        Execute a specialised AI agent.
+        """
+
+        from agents.agent_manager import AgentManager
+
+        self._memory.add_user(user_input)
+
+        chat_history = self._memory.get_chat_messages()[:-1]
+
+        try:
+
+            mgr = AgentManager(
+                model=self._model,
+                temperature=self._temperature,
+            )
+
+            agent = mgr.get_agent(agent_type)
+
+            if agent_type == "vision":
+
+                response = agent.run(
+                    user_input,
+                    ocr_text=ocr_text,
+                    image_bytes=image_bytes,
+                    chat_history=chat_history,
+                )
+
+            else:
+
+                response = agent.run(
+                    user_input,
+                    chat_history=chat_history,
+                )
+
+        except Exception as exc:
+
+            logger.error(
+                "Agent error (%s): %s",
+                agent_type,
+                exc,
+            )
+
+            response = f"Agent error: {exc}"
+
+        self._memory.add_ai(response)
+
+        return response
+</file>
+
+<file path="app/routes.py">
+"""
+routes.py — Route definitions mapping paths to controllers.
+(Used programmatically; Streamlit handles routing via UI components.)
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+ROUTES = {
+    "/": "chat",
+    "/chat": "chat",
+    "/rag": "rag",
+    "/agents": "agents",
+    "/vision": "vision",
+    "/export": "export",
+    "/history": "history",
+}
+
+
+def resolve(path: str) -> str:
+    """
+    Resolve a URL path to a controller action name.
+
+    Args:
+        path: URL path string.
+
+    Returns:
+        Action name string, defaults to 'chat'.
+    """
+    action = ROUTES.get(path, "chat")
+    logger.debug("Route %s → %s", path, action)
+    return action
+</file>
+
+<file path="config/__init__.py">
+
+</file>
+
+<file path="config/constants.py">
+"""
+constants.py — Application-wide constants.
+"""
+
+# Supported file types for document upload
+SUPPORTED_DOC_TYPES = ["pdf", "txt", "docx", "csv", "md"]
+SUPPORTED_IMAGE_TYPES = ["png", "jpg", "jpeg", "bmp", "tiff", "webp"]
+
+# Vector store backend options
+VECTOR_BACKEND_CHROMA = "chroma"
+VECTOR_BACKEND_FAISS = "faiss"
+
+# Agent types
+AGENT_ACADEMIC = "academic"
+AGENT_RESEARCH = "research"
+AGENT_VISION = "vision"
+
+# Memory types
+MEMORY_BUFFER = "buffer"
+MEMORY_SUMMARY = "summary"
+
+# Streamlit session keys
+SESSION_MESSAGES = "messages"
+SESSION_MEMORY = "memory"
+SESSION_VECTOR_STORE = "vector_store"
+SESSION_AGENT = "agent"
+SESSION_HISTORY_ID = "history_id"
+
+# OCR languages
+OCR_LANG_DEFAULT = "eng"
+OCR_LANG_SPANISH = "spa"
+OCR_LANG_MULTI = "eng+spa"
+
+# Document export formats
+EXPORT_PDF = "pdf"
+EXPORT_DOCX = "docx"
+EXPORT_TXT = "txt"
+EXPORT_MD = "md"
+
+# System prompt tokens to reserve
+SYSTEM_PROMPT_RESERVE = 500
+
+# UI
+MAX_DISPLAY_MESSAGES = 100
+</file>
+
+<file path="config/logger.py">
+"""
+logger.py — Centralized logging configuration.
+"""
+import logging
+import os
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
+
+from config.settings import settings
+
+
+def get_logger(name: str) -> logging.Logger:
+    """
+    Return a named logger with file + console handlers.
+
+    Args:
+        name: Module name (use __name__).
+
+    Returns:
+        Configured Logger instance.
+    """
+    logger = logging.getLogger(name)
+
+    if logger.handlers:
+        return logger
+
+    logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
+
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    # Console handler
+    ch = logging.StreamHandler()
+    ch.setFormatter(fmt)
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+
+    # File handler
+    log_dir = Path(settings.LOGS_DIR)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    fh = RotatingFileHandler(
+        log_dir / "campusmind.log",
+        maxBytes=5 * 1024 * 1024,
+        backupCount=3,
+        encoding="utf-8",
+    )
+    fh.setFormatter(fmt)
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
+
+    return logger
+</file>
+
+<file path="config/settings.py">
+"""
+settings.py — Centralized configuration loaded from environment variables.
+"""
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Settings:
+    """Singleton configuration class for CampusMind AI."""
+
+    # ── Groq (legacy, kept for backward compat) ───────────────────────────────
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
+    # ── OpenRouter ────────────────────────────────────────────────────────────
+    OPENROUTER_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+
+    # ── LLM defaults ──────────────────────────────────────────────────────────
+    DEFAULT_MODEL: str = os.getenv(
+    "DEFAULT_MODEL", "meta-llama/llama-3.1-8b-instruct:free"
+    )
+    AVAILABLE_MODELS: list = [
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "mistralai/mistral-7b-instruct:free",
+    "meta-llama/llama-3.1-70b-instruct",
+    "openai/gpt-4o-mini",
+    ]
+    DEFAULT_TEMPERATURE: float = float(os.getenv("DEFAULT_TEMPERATURE", "0.7"))
+    MAX_TOKENS: int = int(os.getenv("MAX_TOKENS", "4096"))
+
+    # ── Embeddings ────────────────────────────────────────────────────────────
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+
+    # ── Vector stores ─────────────────────────────────────────────────────────
+    CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "./campusmind_data/chroma")
+    FAISS_INDEX_PATH: str = os.getenv("FAISS_INDEX_PATH", "./campusmind_data/faiss")
+
+    # ── Database ──────────────────────────────────────────────────────────────
+    SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./campusmind_data/history.db")
+
+    # ── RAG ───────────────────────────────────────────────────────────────────
+    CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "1000"))
+    CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
+    RETRIEVAL_K: int = int(os.getenv("RETRIEVAL_K", "4"))
+
+    # ── Paths ─────────────────────────────────────────────────────────────────
+    UPLOADS_DIR: str = os.getenv("UPLOADS_DIR", "./campusmind/uploads")
+    OUTPUTS_DIR: str = os.getenv("OUTPUTS_DIR", "./campusmind/outputs")
+    LOGS_DIR: str = os.getenv("LOGS_DIR", "./campusmind/logs")
+
+    # ── App ───────────────────────────────────────────────────────────────────
+    APP_NAME: str = "CampusMind AI"
+    APP_VERSION: str = "1.0.0"
+    DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
+
+    def validate(self) -> None:
+        """Raise if required secrets are missing."""
+        if not self.OPENROUTER_API_KEY and not self.GROQ_API_KEY:
+            raise ValueError(
+                "OPENROUTER_API_KEY is not set. Please add it to your environment secrets."
+            )
+
+
+settings = Settings()
+</file>
+
+<file path="database/__init__.py">
+
+</file>
+
+<file path="database/sqlite_manager.py">
+"""
+sqlite_manager.py — SQLite persistence layer for chat history.
+"""
+from __future__ import annotations
+
+import sqlite3
+from pathlib import Path
+from typing import List
+
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class SQLiteManager:
+    """
+    Thread-safe SQLite manager for chat history persistence.
+    Uses the connection-per-call pattern to avoid thread issues with Streamlit.
+    """
+
+    def __init__(self, db_path: str) -> None:
+        self._db_path = db_path
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        self._init_schema()
+        logger.info("SQLiteManager ready: %s", db_path)
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self._db_path, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _init_schema(self) -> None:
+        """Create tables if they don't exist."""
+        with self._connect() as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS messages (
+                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id TEXT    NOT NULL,
+                    role       TEXT    NOT NULL,
+                    content    TEXT    NOT NULL,
+                    timestamp  TEXT    NOT NULL
+                )
+            """)
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_session ON messages(session_id)"
+            )
+            conn.commit()
+
+    def insert_message(
+        self,
+        session_id: str,
+        role: str,
+        content: str,
+        timestamp: str,
+    ) -> None:
+        """Insert a single message row."""
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT INTO messages (session_id, role, content, timestamp) VALUES (?,?,?,?)",
+                (session_id, role, content, timestamp),
+            )
+            conn.commit()
+
+    def get_messages(self, session_id: str) -> List[dict]:
+        """
+        Retrieve all messages for a session ordered chronologically.
+
+        Returns:
+            List of dicts with keys: role, content, timestamp.
+        """
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT role, content, timestamp FROM messages WHERE session_id=? ORDER BY id ASC",
+                (session_id,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def list_sessions(self) -> List[str]:
+        """Return distinct session IDs, most recent first."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT DISTINCT session_id FROM messages ORDER BY id DESC"
+            ).fetchall()
+        return [r["session_id"] for r in rows]
+
+    def delete_session(self, session_id: str) -> None:
+        """Remove all messages for a session."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM messages WHERE session_id=?", (session_id,))
+            conn.commit()
+        logger.info("Deleted session: %s", session_id)
+</file>
+
+<file path="docker-compose.yml">
+version: "3.9"
+
+services:
+  campusmind:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PORT=8080
+    volumes:
+      - campusmind_data:/app/campusmind_data
+      - ./campusmind/uploads:/app/campusmind/uploads
+      - ./campusmind/outputs:/app/campusmind/outputs
+      - ./campusmind/logs:/app/campusmind/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  campusmind_data:
+</file>
+
+<file path="embeddings/__init__.py">
+
+</file>
+
+<file path="embeddings/embedding_manager.py">
+"""
+embedding_manager.py — Manages embedding models (Singleton + Strategy pattern).
+"""
+from __future__ import annotations
+
+from langchain_core.embeddings import Embeddings
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+
+class EmbeddingManager:
+    """
+    Singleton that provides a shared Embeddings instance.
+    Uses ChromaDB's built-in fast embedding by default to avoid heavy deps.
+    Falls back gracefully if HuggingFace is unavailable.
+    """
+
+    _instance: "EmbeddingManager | None" = None
+    _embeddings: Embeddings | None = None
+
+    def __new__(cls) -> "EmbeddingManager":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def get_embeddings(self) -> Embeddings:
+        """
+        Return a cached Embeddings instance.
+
+        Tries HuggingFaceEmbeddings first; falls back to a lightweight
+        ChromaDB-compatible default embedding.
+
+        Returns:
+            Embeddings instance.
+        """
+        if self._embeddings is not None:
+            return self._embeddings
+
+        # Try HuggingFace sentence-transformers (optional heavy dep)
+        try:
+            from langchain_huggingface import HuggingFaceEmbeddings
+            self._embeddings = HuggingFaceEmbeddings(
+                model_name=settings.EMBEDDING_MODEL,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
+            logger.info("Using HuggingFaceEmbeddings: %s", settings.EMBEDDING_MODEL)
+            return self._embeddings
+        except Exception:
+            pass
+
+        # Fallback: use Chroma's default embedding (no external download)
+        try:
+            from chromadb.utils.embedding_functions import (
+                DefaultEmbeddingFunction,
+            )
+            from langchain_core.embeddings import Embeddings as BaseEmb
+
+            class _ChromaDefaultEmbeddings(BaseEmb):
+                """Thin LangChain wrapper around ChromaDB's built-in embedder."""
+
+                def __init__(self) -> None:
+                    self._fn = DefaultEmbeddingFunction()
+
+                def embed_documents(self, texts):
+                    return self._fn(texts)
+
+                def embed_query(self, text):
+                    return self._fn([text])[0]
+
+            self._embeddings = _ChromaDefaultEmbeddings()
+            logger.info("Using ChromaDB default embeddings (fallback)")
+            return self._embeddings
+        except Exception as exc:
+            logger.error("Could not load any embedding model: %s", exc)
+            raise RuntimeError("No embedding backend available") from exc
+</file>
+
+<file path="embeddings/models.py">
+"""
+models.py — Registry of available embedding model configurations.
+"""
+from __future__ import annotations
+
+EMBEDDING_MODELS = {
+    "all-MiniLM-L6-v2": {
+        "name": "all-MiniLM-L6-v2",
+        "dimensions": 384,
+        "description": "Fast, lightweight sentence embeddings (default)",
+        "provider": "huggingface",
+    },
+    "all-mpnet-base-v2": {
+        "name": "all-mpnet-base-v2",
+        "dimensions": 768,
+        "description": "Higher quality sentence embeddings",
+        "provider": "huggingface",
+    },
+    "chroma-default": {
+        "name": "chroma-default",
+        "dimensions": 384,
+        "description": "ChromaDB built-in embeddings (no download required)",
+        "provider": "chroma",
+    },
+}
+
+
+def get_model_info(name: str) -> dict:
+    """Return metadata for a named embedding model."""
+    return EMBEDDING_MODELS.get(name, EMBEDDING_MODELS["chroma-default"])
+
+
+def list_models() -> list[dict]:
+    """Return all available embedding model configurations."""
+    return list(EMBEDDING_MODELS.values())
+</file>
+
+<file path="llm/__init__.py">
+
+</file>
+
+<file path="llm/chains.py">
+"""
+chains.py — LangChain LCEL chain builders.
+"""
+from __future__ import annotations
+
+from datetime import date
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+
+from config.logger import get_logger
+from llm.prompts import (
+    GENERAL_PROMPT,
+    RAG_PROMPT,
+    SUMMARISE_PROMPT,
+)
+
+logger = get_logger(__name__)
+
+
+def _inject_date(inputs: dict) -> dict:
+    """Add today's date to the inputs dict."""
+    inputs.setdefault("date", date.today().isoformat())
+    return inputs
+
+
+def build_chat_chain(llm: BaseChatModel):
+    """
+    Build a simple conversational chain (no RAG).
+
+    Returns:
+        LCEL Runnable: input {input, chat_history} → str
+    """
+    logger.debug("Building chat chain")
+    return (
+        RunnableLambda(_inject_date)
+        | GENERAL_PROMPT
+        | llm
+        | StrOutputParser()
+    )
+
+
+def build_rag_chain(llm: BaseChatModel):
+    """
+    Build a RAG-augmented conversational chain.
+
+    Returns:
+        LCEL Runnable: input {input, chat_history, context} → str
+    """
+    logger.debug("Building RAG chain")
+    return (
+        RunnableLambda(_inject_date)
+        | RAG_PROMPT
+        | llm
+        | StrOutputParser()
+    )
+
+
+def build_summarise_chain(llm: BaseChatModel):
+    """
+    Build a document summarisation chain.
+
+    Returns:
+        LCEL Runnable: input {document_text} → str
+    """
+    logger.debug("Building summarise chain")
+    return SUMMARISE_PROMPT | llm | StrOutputParser()
+</file>
+
+<file path="llm/llm_factory.py">
+"""
+llm_factory.py — Factory pattern for creating LLM instances.
+"""
+from __future__ import annotations
+
+from langchain_core.language_models import BaseChatModel
+
+from config.logger import get_logger
+from config.settings import settings
+from llm.openrouter_client import OpenRouterClient
+
+logger = get_logger(__name__)
+
+_openrouter_client = OpenRouterClient()
+
+
+class LLMFactory:
+    """Factory for producing configured LLM instances (Strategy pattern)."""
+
+    @staticmethod
+    def create(
+        provider: str = "openrouter",
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> BaseChatModel:
+        if provider in ("openrouter", "groq"):
+            return _openrouter_client.get_llm(
+                model=model or settings.DEFAULT_MODEL,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        raise ValueError(f"Unsupported LLM provider: '{provider}'")
+</file>
+
+<file path="llm/openrouter_client.py">
+"""
+openrouter_client.py — OpenRouter API client (Singleton pattern).
+"""
+from __future__ import annotations
+
+from langchain_openai import ChatOpenAI
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+
+class OpenRouterClient:
+    """Singleton wrapper around ChatOpenAI pointed at OpenRouter."""
+
+    _instance: OpenRouterClient | None = None
+
+    def __new__(cls) -> "OpenRouterClient":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self) -> None:
+        if self._initialized:
+            return
+        self._initialized = True
+        logger.info("Initialising OpenRouterClient singleton")
+
+    def get_llm(
+        self,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> ChatOpenAI:
+        model = model or settings.DEFAULT_MODEL
+        temperature = temperature if temperature is not None else settings.DEFAULT_TEMPERATURE
+        max_tokens = max_tokens or settings.MAX_TOKENS
+
+        logger.debug("Creating ChatOpenAI (OpenRouter): model=%s temp=%.2f", model, temperature)
+        return ChatOpenAI(
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            api_key=settings.OPENROUTER_API_KEY,
+            base_url=OPENROUTER_BASE_URL,
+        )
+</file>
+
+<file path="llm/prompts.py">
+"""
+prompts.py — Centralised prompt templates for all agents and chains.
+"""
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# ── General conversational assistant ──────────────────────────────────────────
+GENERAL_SYSTEM = """You are CampusMind AI, an advanced intelligent assistant for universities.
+You help students, professors, and researchers with academic tasks, research queries,
+document analysis, and knowledge retrieval.
+
+Be precise, helpful, and academically rigorous. When you don't know something, say so.
+Always cite relevant context from documents when available.
+
+Current date: {date}
+"""
+
+GENERAL_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", GENERAL_SYSTEM),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# ── RAG-augmented prompt ───────────────────────────────────────────────────────
+RAG_SYSTEM = """You are CampusMind AI, an expert academic assistant with access to a
+knowledge base of uploaded documents.
+
+Use the provided context below to answer the user's question accurately.
+If the answer cannot be found in the context, say so and answer from your training knowledge.
+Always indicate when you are using information from the documents vs. your general knowledge.
+
+Context from documents:
+{context}
+
+Current date: {date}
+"""
+
+RAG_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", RAG_SYSTEM),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# ── Academic agent ─────────────────────────────────────────────────────────────
+ACADEMIC_SYSTEM = """You are an Academic Agent specializing in university-level education.
+Your expertise includes:
+- Explaining complex academic concepts clearly
+- Helping with essay structure and academic writing
+- Summarizing research papers and textbooks
+- Assisting with citations and references (APA, MLA, Chicago)
+- Answering subject-specific questions across disciplines
+
+Always provide well-structured, academically rigorous responses.
+"""
+
+ACADEMIC_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", ACADEMIC_SYSTEM),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# ── Research agent ─────────────────────────────────────────────────────────────
+RESEARCH_SYSTEM = """You are a Research Agent specializing in academic research methodology.
+Your expertise includes:
+- Research methodology and design
+- Literature review and synthesis
+- Data analysis interpretation
+- Scientific writing and publication standards
+- Hypothesis formulation and testing
+- Statistical concepts and their application
+
+Provide thorough, evidence-based responses suitable for academic research contexts.
+"""
+
+RESEARCH_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", RESEARCH_SYSTEM),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# ── Vision agent ───────────────────────────────────────────────────────────────
+VISION_SYSTEM = """You are a Vision Agent that analyzes images and extracted text.
+When presented with OCR output or image descriptions, help the user understand,
+summarize, and work with the visual content.
+"""
+
+VISION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", VISION_SYSTEM),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# ── Document summarisation ─────────────────────────────────────────────────────
+SUMMARISE_SYSTEM = """You are a document summarisation expert.
+Produce a clear, structured summary of the provided document content.
+Include: main topics, key findings, important details, and conclusions.
+Format the summary with headers and bullet points for clarity.
+"""
+
+SUMMARISE_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", SUMMARISE_SYSTEM),
+    ("human", "Please summarise this document:\n\n{document_text}"),
+])
+</file>
+
+<file path="main.py">
+"""
+main.py — Project entry point. Launches the Streamlit app.
+"""
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    """Launch the CampusMind AI Streamlit application."""
+    ui_path = Path(__file__).parent / "ui" / "streamlit_ui.py"
+
+    port = int(os.environ.get("PORT", 8080))
+
+    cmd = [
+        sys.executable, "-m", "streamlit", "run",
+        str(ui_path),
+        "--server.port", str(port),
+        "--server.address", "0.0.0.0",
+        "--server.headless", "true",
+        "--browser.gatherUsageStats", "false",
+    ]
+
+    print(f"Starting CampusMind AI on port {port}…")
+    subprocess.run(cmd, check=True)
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="memory/__init__.py">
+
+</file>
+
+<file path="memory/chat_memory.py">
+"""
+chat_memory.py — In-session conversation memory using LangChain.
+"""
+from __future__ import annotations
+
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.messages import AIMessage, HumanMessage
+
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class ChatMemory:
+    """
+    Wraps ChatMessageHistory to provide typed add/get operations.
+    One instance per Streamlit session.
+    """
+
+    def __init__(self) -> None:
+        self._history = ChatMessageHistory()
+        logger.debug("ChatMemory initialised")
+
+    def add_user(self, message: str) -> None:
+        """Add a human message."""
+        self._history.add_user_message(message)
+
+    def add_ai(self, message: str) -> None:
+        """Add an AI message."""
+        self._history.add_ai_message(message)
+
+    def get_messages(self) -> list:
+        """Return all messages as LangChain message objects."""
+        return self._history.messages
+
+    def get_as_dicts(self) -> list[dict]:
+        """Return messages as {'role': ..., 'content': ...} dicts for UI display."""
+        result = []
+        for m in self._history.messages:
+            if isinstance(m, HumanMessage):
+                result.append({"role": "user", "content": m.content})
+            elif isinstance(m, AIMessage):
+                result.append({"role": "assistant", "content": m.content})
+        return result
+
+    def clear(self) -> None:
+        """Reset memory."""
+        self._history.clear()
+        logger.debug("ChatMemory cleared")
+
+    def __len__(self) -> int:
+        return len(self._history.messages)
+</file>
+
+<file path="memory/memory_manager.py">
+"""
+memory_manager.py — Unified facade for in-session and persistent memory.
+"""
+from __future__ import annotations
+
+import uuid
+
+from config.logger import get_logger
+from memory.chat_memory import ChatMemory
+from memory.persistent_memory import PersistentMemory
+
+logger = get_logger(__name__)
+
+
+class MemoryManager:
+    """
+    Facade combining ChatMemory (in-session) and PersistentMemory (SQLite).
+    One instance lives in the Streamlit session_state.
+    """
+
+    def __init__(self, session_id: str | None = None) -> None:
+        self._session_id = session_id or str(uuid.uuid4())
+        self._chat = ChatMemory()
+        self._persistent = PersistentMemory(self._session_id)
+        logger.info("MemoryManager created: session=%s", self._session_id)
+
+    @property
+    def session_id(self) -> str:
+        return self._session_id
+
+    def add_user(self, message: str) -> None:
+        self._chat.add_user(message)
+        self._persistent.save_message("user", message)
+
+    def add_ai(self, message: str) -> None:
+        self._chat.add_ai(message)
+        self._persistent.save_message("assistant", message)
+
+    def get_chat_messages(self) -> list:
+        """LangChain message objects for the chain."""
+        return self._chat.get_messages()
+
+    def get_display_messages(self) -> list[dict]:
+        """Dict messages for Streamlit UI rendering."""
+        return self._chat.get_as_dicts()
+
+    def load_session(self) -> list[dict]:
+        """Load persisted messages for this session from SQLite."""
+        return self._persistent.load_history()
+
+    def list_sessions(self) -> list[str]:
+        return self._persistent.list_sessions()
+
+    def clear(self) -> None:
+        self._chat.clear()
+        logger.info("In-session memory cleared for session=%s", self._session_id)
+</file>
+
+<file path="memory/persistent_memory.py">
+"""
+persistent_memory.py — Persists conversation history to SQLite.
+"""
+from __future__ import annotations
+
+import json
+from datetime import datetime
+
+from config.logger import get_logger
+from config.settings import settings
+from database.sqlite_manager import SQLiteManager
+
+logger = get_logger(__name__)
+
+
+class PersistentMemory:
+    """
+    Observer-style class that writes messages to SQLite for cross-session recall.
+    """
+
+    def __init__(self, session_id: str) -> None:
+        self._session_id = session_id
+        self._db = SQLiteManager(settings.SQLITE_DB_PATH)
+        logger.debug("PersistentMemory session=%s", session_id)
+
+    def save_message(self, role: str, content: str) -> None:
+        """
+        Persist a single message.
+
+        Args:
+            role: 'user' or 'assistant'.
+            content: Message text.
+        """
+        self._db.insert_message(
+            session_id=self._session_id,
+            role=role,
+            content=content,
+            timestamp=datetime.utcnow().isoformat(),
+        )
+
+    def load_history(self) -> list[dict]:
+        """
+        Load all messages for this session.
+
+        Returns:
+            List of {'role': ..., 'content': ..., 'timestamp': ...} dicts.
+        """
+        return self._db.get_messages(self._session_id)
+
+    def list_sessions(self) -> list[str]:
+        """Return all session IDs in the database."""
+        return self._db.list_sessions()
+</file>
+
+<file path="rag/__init__.py">
+
+</file>
+
+<file path="rag/document_loader.py">
+"""
+document_loader.py — Loads documents from various file formats into LangChain Documents.
+"""
+from __future__ import annotations
+
+import csv
+import io
+from pathlib import Path
+from typing import List
+
+from langchain_core.documents import Document
+
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class DocumentLoader:
+    """
+    Adapter that converts uploaded files into LangChain Document objects.
+    Supports: PDF, TXT, DOCX, CSV, MD.
+    """
+
+    @staticmethod
+    def load_from_bytes(file_bytes: bytes, filename: str) -> List[Document]:
+        """
+        Load a document from raw bytes and filename.
+
+        Args:
+            file_bytes: Raw file content.
+            filename: Original filename (used to detect format).
+
+        Returns:
+            List of LangChain Document objects.
+        """
+        ext = Path(filename).suffix.lower().lstrip(".")
+        logger.info("Loading document: %s (type=%s)", filename, ext)
+
+        loaders = {
+            "pdf": DocumentLoader._load_pdf,
+            "txt": DocumentLoader._load_txt,
+            "md": DocumentLoader._load_txt,
+            "docx": DocumentLoader._load_docx,
+            "csv": DocumentLoader._load_csv,
+        }
+
+        loader_fn = loaders.get(ext)
+        if loader_fn is None:
+            raise ValueError(f"Unsupported file type: .{ext}")
+
+        docs = loader_fn(file_bytes, filename)
+        logger.info("Loaded %d chunks from %s", len(docs), filename)
+        return docs
+
+    @staticmethod
+    def _load_pdf(data: bytes, filename: str) -> List[Document]:
+        """Extract text from PDF pages using pypdf."""
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(data))
+            docs = []
+            for i, page in enumerate(reader.pages):
+                text = page.extract_text() or ""
+                if text.strip():
+                    docs.append(Document(
+                        page_content=text,
+                        metadata={"source": filename, "page": i + 1},
+                    ))
+            return docs
+        except Exception as exc:
+            logger.error("PDF load error: %s", exc)
+            raise
+
+    @staticmethod
+    def _load_txt(data: bytes, filename: str) -> List[Document]:
+        """Load plain text or markdown file."""
+        text = data.decode("utf-8", errors="replace")
+        return [Document(page_content=text, metadata={"source": filename})]
+
+    @staticmethod
+    def _load_docx(data: bytes, filename: str) -> List[Document]:
+        """Extract text from DOCX file."""
+        try:
+            from docx import Document as DocxDocument
+            doc = DocxDocument(io.BytesIO(data))
+            text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+            return [Document(page_content=text, metadata={"source": filename})]
+        except Exception as exc:
+            logger.error("DOCX load error: %s", exc)
+            raise
+
+    @staticmethod
+    def _load_csv(data: bytes, filename: str) -> List[Document]:
+        """Convert CSV rows into Document objects."""
+        text_io = io.StringIO(data.decode("utf-8", errors="replace"))
+        reader = csv.DictReader(text_io)
+        docs = []
+        for i, row in enumerate(reader):
+            content = "\n".join(f"{k}: {v}" for k, v in row.items())
+            docs.append(Document(
+                page_content=content,
+                metadata={"source": filename, "row": i + 1},
+            ))
+        return docs
+</file>
+
+<file path="rag/query_engine.py">
+"""
+query_engine.py — High-level query interface combining retrieval + LLM.
+"""
+from __future__ import annotations
+
+from langchain_core.language_models import BaseChatModel
+
+from config.logger import get_logger
+from llm.chains import build_rag_chain
+from rag.retriever import DocumentRetriever
+
+logger = get_logger(__name__)
+
+
+class QueryEngine:
+    """
+    End-to-end RAG query engine: retrieve → format context → generate answer.
+    """
+
+    def __init__(self, llm: BaseChatModel, backend: str = "chroma") -> None:
+        self._retriever = DocumentRetriever(backend=backend)
+        self._chain = build_rag_chain(llm)
+        logger.info("QueryEngine initialised")
+
+    def query(
+        self,
+        question: str,
+        chat_history: list | None = None,
+        k: int | None = None,
+    ) -> dict:
+        """
+        Run a RAG query.
+
+        Args:
+            question: User question.
+            chat_history: Previous message objects.
+            k: Number of chunks to retrieve.
+
+        Returns:
+            Dict with 'answer' (str) and 'sources' (list of str).
+        """
+        docs = self._retriever.retrieve(question, k=k)
+        context = self._retriever.format_context(docs)
+        sources = list({d.metadata.get("source", "unknown") for d in docs})
+
+        answer = self._chain.invoke({
+            "input": question,
+            "chat_history": chat_history or [],
+            "context": context,
+        })
+
+        logger.info("QueryEngine answered using %d docs from %s", len(docs), sources)
+        return {"answer": answer, "sources": sources}
+</file>
+
+<file path="rag/rag_pipeline.py">
+"""
+rag_pipeline.py — End-to-end RAG pipeline: ingest + query.
+"""
+from __future__ import annotations
+
+from typing import List
+
+from langchain_core.documents import Document
+
+from config.logger import get_logger
+from embeddings.embedding_manager import EmbeddingManager
+from rag.document_loader import DocumentLoader
+from rag.retriever import DocumentRetriever
+from rag.splitter import DocumentSplitter
+from vectorstore.vector_factory import VectorStoreFactory
+
+logger = get_logger(__name__)
+_em = EmbeddingManager()
+
+
+class RAGPipeline:
+    """
+    Orchestrates the full Retrieval-Augmented Generation pipeline.
+
+    Ingest path:  file_bytes → load → split → embed → store
+    Query path:   question → retrieve → format_context → LLM
+    """
+
+    def __init__(self, backend: str = "chroma", collection: str = "campusmind") -> None:
+        self._loader = DocumentLoader()
+        self._splitter = DocumentSplitter()
+        self._retriever = DocumentRetriever(backend=backend, collection=collection)
+        self._manager = VectorStoreFactory.get_manager(backend, collection)
+        self._ingested_files: List[str] = []
+
+    def ingest(self, file_bytes: bytes, filename: str) -> int:
+        """
+        Load, split, and embed a file into the vector store.
+
+        Args:
+            file_bytes: Raw file content.
+            filename: Original file name (determines parser).
+
+        Returns:
+            Number of chunks ingested.
+        """
+        docs = self._loader.load_from_bytes(file_bytes, filename)
+        chunks = self._splitter.split(docs)
+        embeddings = _em.get_embeddings()
+        self._manager.add_documents(chunks, embeddings)
+        self._ingested_files.append(filename)
+        logger.info("Ingested '%s' → %d chunks", filename, len(chunks))
+        return len(chunks)
+
+    def get_context(self, query: str, k: int | None = None) -> str:
+        """
+        Retrieve relevant context for a query.
+
+        Args:
+            query: User question.
+            k: Number of chunks to retrieve.
+
+        Returns:
+            Formatted context string for the LLM prompt.
+        """
+        docs = self._retriever.retrieve(query, k=k)
+        return self._retriever.format_context(docs)
+
+    @property
+    def ingested_files(self) -> List[str]:
+        return list(self._ingested_files)
+
+    def reset(self) -> None:
+        """Clear all ingested documents from the vector store."""
+        embeddings = _em.get_embeddings()
+        self._manager.reset(embeddings)
+        self._ingested_files.clear()
+        logger.warning("RAG pipeline reset — all documents removed")
+</file>
+
+<file path="rag/retriever.py">
+"""
+retriever.py — Semantic retriever that queries the vector store.
+"""
+from __future__ import annotations
+
+from typing import List
+
+from langchain_core.documents import Document
+
+from config.logger import get_logger
+from config.settings import settings
+from embeddings.embedding_manager import EmbeddingManager
+from vectorstore.vector_factory import VectorStoreFactory
+
+logger = get_logger(__name__)
+_em = EmbeddingManager()
+
+
+class DocumentRetriever:
+    """
+    Semantic retrieval over the active vector store.
+    """
+
+    def __init__(self, backend: str = "chroma", collection: str = "campusmind") -> None:
+        self._manager = VectorStoreFactory.get_manager(backend, collection)
+
+    def retrieve(self, query: str, k: int | None = None) -> List[Document]:
+        """
+        Retrieve the top-k most relevant document chunks for a query.
+
+        Args:
+            query: User question or search string.
+            k: Number of results (defaults to settings.RETRIEVAL_K).
+
+        Returns:
+            List of relevant Document chunks.
+        """
+        embeddings = _em.get_embeddings()
+        retriever = self._manager.as_retriever(embeddings, k=k or settings.RETRIEVAL_K)
+        docs = retriever.invoke(query)
+        logger.debug("Retrieved %d docs for query: %s…", len(docs), query[:60])
+        return docs
+
+    def format_context(self, docs: List[Document]) -> str:
+        """
+        Format retrieved documents into a single context string.
+
+        Args:
+            docs: Retrieved document chunks.
+
+        Returns:
+            Concatenated context string with source metadata.
+        """
+        parts = []
+        for i, doc in enumerate(docs, 1):
+            source = doc.metadata.get("source", "unknown")
+            page = doc.metadata.get("page", "")
+            header = f"[Document {i} | {source}" + (f" | p.{page}" if page else "") + "]"
+            parts.append(f"{header}\n{doc.page_content}")
+        return "\n\n---\n\n".join(parts)
+</file>
+
+<file path="rag/splitter.py">
+"""
+splitter.py — Text splitting strategies for chunking documents.
+"""
+from __future__ import annotations
+
+from typing import List
+
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+
+class DocumentSplitter:
+    """
+    Splits raw Documents into overlapping chunks suitable for embedding.
+    Uses RecursiveCharacterTextSplitter (respects paragraph/sentence boundaries).
+    """
+
+    def __init__(
+        self,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+    ) -> None:
+        self.chunk_size = chunk_size or settings.CHUNK_SIZE
+        self.chunk_overlap = chunk_overlap or settings.CHUNK_OVERLAP
+        self._splitter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            separators=["\n\n", "\n", ". ", " ", ""],
+        )
+        logger.debug(
+            "Splitter initialised: chunk_size=%d overlap=%d",
+            self.chunk_size,
+            self.chunk_overlap,
+        )
+
+    def split(self, documents: List[Document]) -> List[Document]:
+        """
+        Split a list of Documents into smaller chunks.
+
+        Args:
+            documents: Raw document list from DocumentLoader.
+
+        Returns:
+            List of smaller Document chunks with preserved metadata.
+        """
+        chunks = self._splitter.split_documents(documents)
+        logger.info("Split %d docs → %d chunks", len(documents), len(chunks))
+        return chunks
+</file>
+
+<file path="requirements.txt">
+streamlit>=1.35.0
+langchain>=1.0.0
+langchain-groq>=0.1.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+chromadb>=0.5.0
+pypdf>=4.0.0
+python-docx>=1.1.0
+reportlab>=4.0.0
+Pillow>=10.0.0
+pandas>=2.0.0
+numpy>=1.26.0
+tiktoken>=0.6.0
+python-dotenv>=1.0.0
+markdown>=3.6
+sqlalchemy>=2.0.0
+langchain-openai>=1.0.0
+# Optional: heavier ML deps (comment out if disk space is limited)
+# sentence-transformers>=2.7.0
+# langchain-huggingface>=0.0.3
+# faiss-cpu>=1.8.0
+# pytesseract>=0.3.10
+</file>
+
+<file path="start.sh">
+#!/usr/bin/env bash
+# start.sh — Launch CampusMind AI
+set -e
+
+PORT=${PORT:-8080}
+UI_PATH="$(dirname "$0")/ui/streamlit_ui.py"
+
+echo "Starting CampusMind AI on port $PORT..."
+
+python -m streamlit run "$UI_PATH" \
+  --server.port "$PORT" \
+  --server.address 0.0.0.0 \
+  --server.headless true \
+  --browser.gatherUsageStats false
+</file>
+
+<file path="tests/__init__.py">
+
+</file>
+
+<file path="tests/test_smoke.py">
+"""
+test_smoke.py — Basic smoke tests (no API calls, no heavy deps required).
+"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
+def test_settings_import():
+    from campusmind.config.settings import settings
+    assert settings.APP_NAME == "CampusMind AI"
+    assert settings.APP_VERSION == "1.0.0"
+
+
+def test_constants_import():
+    from campusmind.config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
+    assert AGENT_ACADEMIC == "academic"
+    assert AGENT_RESEARCH == "research"
+    assert AGENT_VISION == "vision"
+
+
+def test_document_loader_txt():
+    from campusmind.rag.document_loader import DocumentLoader
+    docs = DocumentLoader.load_from_bytes(b"Hello university world!", "test.txt")
+    assert len(docs) == 1
+    assert "Hello university world!" in docs[0].page_content
+
+
+def test_document_loader_csv():
+    from campusmind.rag.document_loader import DocumentLoader
+    csv_data = b"name,grade\nAlice,A\nBob,B"
+    docs = DocumentLoader.load_from_bytes(csv_data, "grades.csv")
+    assert len(docs) == 2
+
+
+def test_splitter():
+    from langchain_core.documents import Document
+    from campusmind.rag.splitter import DocumentSplitter
+    long_text = "word " * 500
+    docs = [Document(page_content=long_text, metadata={"source": "test"})]
+    splitter = DocumentSplitter(chunk_size=100, chunk_overlap=20)
+    chunks = splitter.split(docs)
+    assert len(chunks) > 1
+
+
+def test_report_tool_txt():
+    from campusmind.tools.report_tool import ReportTool
+    tool = ReportTool()
+    messages = [
+        {"role": "user", "content": "Hello"},
+        {"role": "assistant", "content": "Hi there!"},
+    ]
+    data = tool.export_chat(messages, fmt="txt", title="Test Export")
+    assert b"Hello" in data
+    assert b"Hi there!" in data
+
+
+def test_routes():
+    from campusmind.app.routes import resolve
+    assert resolve("/chat") == "chat"
+    assert resolve("/unknown") == "chat"
+
+
+def test_agent_manager_metadata():
+    from campusmind.agents.agent_manager import AgentManager
+    agents = AgentManager.available_agents()
+    assert len(agents) == 3
+    types = [a["type"] for a in agents]
+    assert "academic" in types
+    assert "research" in types
+    assert "vision" in types
+</file>
+
+<file path="tools/__init__.py">
+
+</file>
+
+<file path="tools/document_tool.py">
+"""
+document_tool.py — Tool for loading and summarising documents.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from rag.document_loader import DocumentLoader
+
+logger = get_logger(__name__)
+
+
+class DocumentTool:
+    """Loads and returns document text for downstream use."""
+
+    name = "document_tool"
+    description = "Loads documents (PDF, DOCX, TXT, CSV) and returns their text content."
+
+    def __init__(self) -> None:
+        self._loader = DocumentLoader()
+
+    def load_text(self, file_bytes: bytes, filename: str) -> str:
+        """
+        Load a document and return concatenated text.
+
+        Args:
+            file_bytes: Raw file bytes.
+            filename: Original filename.
+
+        Returns:
+            Concatenated text content.
+        """
+        docs = self._loader.load_from_bytes(file_bytes, filename)
+        text = "\n\n".join(d.page_content for d in docs)
+        logger.info("DocumentTool loaded '%s' (%d chars)", filename, len(text))
+        return text
+</file>
+
+<file path="tools/image_tool.py">
+"""
+image_tool.py — Tool for image analysis and captioning.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from vision.image_analysis import ImageAnalyzer
+from vision.image_captioning import ImageCaptioner
+
+logger = get_logger(__name__)
+
+
+class ImageTool:
+    """Combines ImageAnalyzer and ImageCaptioner into one callable tool."""
+
+    name = "image_tool"
+    description = "Analyzes images: OCR, colour stats, and natural-language description."
+
+    def __init__(self) -> None:
+        self._analyzer = ImageAnalyzer()
+        self._captioner = ImageCaptioner()
+
+    def analyze(self, image_bytes: bytes) -> dict:
+        """Full analysis: metadata + OCR + colour stats."""
+        return self._analyzer.analyze(image_bytes)
+
+    def caption(self, image_bytes: bytes, llm=None) -> str:
+        """Generate a natural-language caption (optionally LLM-enriched)."""
+        return self._captioner.caption(image_bytes, llm=llm)
+</file>
+
+<file path="tools/ocr_tool.py">
+"""
+ocr_tool.py — LangChain-compatible tool wrapper for OCR.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from vision.ocr_engine import OCREngine
+
+logger = get_logger(__name__)
+
+
+class OCRTool:
+    """Adapter exposing OCREngine as a simple callable tool."""
+
+    name = "ocr_tool"
+    description = "Extracts text from image files using OCR."
+
+    def __init__(self) -> None:
+        self._engine = OCREngine()
+
+    def run(self, image_bytes: bytes, lang: str = "eng") -> str:
+        """
+        Extract text from image bytes.
+
+        Args:
+            image_bytes: Raw image data.
+            lang: Tesseract language code.
+
+        Returns:
+            Extracted text or error message.
+        """
+        logger.debug("OCRTool.run called (lang=%s)", lang)
+        return self._engine.extract_text(image_bytes, lang=lang)
+</file>
+
+<file path="tools/report_tool.py">
+"""
+report_tool.py — Generates PDF, DOCX, TXT, and Markdown export files.
+"""
+from __future__ import annotations
+
+import io
+import re
+from datetime import datetime
+from pathlib import Path
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+
+def _parse_lines(text: str) -> list[dict]:
+    """
+    Convierte texto plano con markdown básico en bloques tipados.
+    Tipos: title, heading, subheading, bullet, numbered, empty, paragraph
+    """
+    blocks = []
+    for line in text.split("\n"):
+        raw = line.rstrip()
+        if not raw.strip():
+            blocks.append({"type": "empty"})
+        elif raw.startswith("### "):
+            blocks.append({"type": "subheading", "text": raw[4:].strip()})
+        elif raw.startswith("## "):
+            blocks.append({"type": "heading", "text": raw[3:].strip()})
+        elif raw.startswith("# "):
+            blocks.append({"type": "title", "text": raw[2:].strip()})
+        elif re.match(r"^[-*•]\s+", raw):
+            blocks.append({"type": "bullet", "text": re.sub(r"^[-*•]\s+", "", raw)})
+        elif re.match(r"^\d+\.\s+", raw):
+            blocks.append({"type": "numbered", "text": re.sub(r"^\d+\.\s+", "", raw)})
+        elif raw.startswith("**") and raw.endswith("**") and len(raw) > 4:
+            blocks.append({"type": "heading", "text": raw.strip("*").strip()})
+        else:
+            blocks.append({"type": "paragraph", "text": raw})
+    return blocks
+
+
+class ReportTool:
+    def __init__(self) -> None:
+        output_dir = Path(settings.OUTPUTS_DIR)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        self._output_dir = output_dir
+
+    def export_chat(self, messages: list[dict], fmt: str = "txt", title: str = "Chat Export") -> bytes:
+        text_lines = []
+        for m in messages:
+            role = "You" if m["role"] == "user" else "CampusMind AI"
+            text_lines.append(f"{role}:\n{m['content']}\n")
+        full_text = "\n".join(text_lines)
+        return self.generate_report(full_text, title, fmt)
+
+    def generate_report(self, content: str, title: str, fmt: str = "pdf") -> bytes:
+        dispatch = {
+            "pdf": self._to_pdf,
+            "docx": self._to_docx,
+            "txt": self._to_txt,
+            "md": self._to_md,
+        }
+        fn = dispatch.get(fmt, self._to_txt)
+        return fn(content, title)
+
+    @staticmethod
+    def _to_pdf(text: str, title: str) -> bytes:
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import cm
+            from reportlab.lib import colors
+            from reportlab.platypus import (
+                Paragraph, SimpleDocTemplate, Spacer, ListFlowable, ListItem
+            )
+            from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
+
+            buf = io.BytesIO()
+            doc = SimpleDocTemplate(
+                buf, pagesize=A4,
+                rightMargin=2.5*cm, leftMargin=2.5*cm,
+                topMargin=2.5*cm, bottomMargin=2.5*cm
+            )
+
+            base = getSampleStyleSheet()
+
+            styles = {
+                "doc_title": ParagraphStyle("doc_title", parent=base["Title"],
+                    fontSize=22, textColor=colors.HexColor("#1F3864"),
+                    spaceAfter=6, leading=28, alignment=TA_CENTER),
+                "date": ParagraphStyle("date", parent=base["Normal"],
+                    fontSize=9, textColor=colors.HexColor("#888888"),
+                    spaceAfter=20, alignment=TA_CENTER),
+                "heading": ParagraphStyle("heading", parent=base["Heading1"],
+                    fontSize=14, textColor=colors.HexColor("#2E75B6"),
+                    spaceBefore=16, spaceAfter=6, leading=18),
+                "subheading": ParagraphStyle("subheading", parent=base["Heading2"],
+                    fontSize=12, textColor=colors.HexColor("#1F3864"),
+                    spaceBefore=10, spaceAfter=4, leading=16),
+                "paragraph": ParagraphStyle("paragraph", parent=base["Normal"],
+                    fontSize=11, textColor=colors.HexColor("#222222"),
+                    spaceAfter=8, leading=17, alignment=TA_JUSTIFY),
+                "bullet_item": ParagraphStyle("bullet_item", parent=base["Normal"],
+                    fontSize=11, textColor=colors.HexColor("#222222"),
+                    leading=16, leftIndent=0),
+            }
+
+            story = [
+                Paragraph(title, styles["doc_title"]),
+                Paragraph(datetime.now().strftime("%d de %B de %Y"), styles["date"]),
+                Spacer(1, 0.3*cm),
+            ]
+
+            blocks = _parse_lines(text)
+            bullet_group = []
+
+            def flush_bullets():
+                if bullet_group:
+                    story.append(ListFlowable(
+                        [ListItem(Paragraph(b, styles["bullet_item"]), leftIndent=20, bulletColor=colors.HexColor("#2E75B6")) for b in bullet_group],
+                        bulletType="bullet", leftIndent=20, spaceAfter=8
+                    ))
+                    bullet_group.clear()
+
+            for block in blocks:
+                t = block["type"]
+                if t == "empty":
+                    flush_bullets()
+                    story.append(Spacer(1, 0.2*cm))
+                elif t in ("title", "heading"):
+                    flush_bullets()
+                    story.append(Paragraph(block["text"], styles["heading"]))
+                elif t == "subheading":
+                    flush_bullets()
+                    story.append(Paragraph(block["text"], styles["subheading"]))
+                elif t in ("bullet", "numbered"):
+                    bullet_group.append(block["text"])
+                elif t == "paragraph":
+                    flush_bullets()
+                    cleaned = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", block["text"])
+                    cleaned = re.sub(r"\*(.*?)\*", r"<i>\1</i>", cleaned)
+                    story.append(Paragraph(cleaned, styles["paragraph"]))
+
+            flush_bullets()
+            doc.build(story)
+            logger.info("PDF generado: %d bytes", buf.tell())
+            return buf.getvalue()
+
+        except Exception as exc:
+            logger.error("PDF generation error: %s", exc)
+            return text.encode()
+
+    @staticmethod
+    def _to_docx(text: str, title: str) -> bytes:
+        try:
+            from docx import Document
+            from docx.shared import Pt, RGBColor, Inches, Cm
+            from docx.enum.text import WD_ALIGN_PARAGRAPH
+            import re
+
+            doc = Document()
+
+            # Márgenes
+            for section in doc.sections:
+                section.top_margin = Cm(2.5)
+                section.bottom_margin = Cm(2.5)
+                section.left_margin = Cm(2.5)
+                section.right_margin = Cm(2.5)
+
+            # Título principal
+            h = doc.add_heading(title, level=0)
+            h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = h.runs[0]
+            run.font.color.rgb = RGBColor(0x1F, 0x38, 0x64)
+            run.font.size = Pt(22)
+
+            # Fecha
+            date_p = doc.add_paragraph(datetime.now().strftime("%d de %B de %Y"))
+            date_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            date_p.runs[0].font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+            date_p.runs[0].font.size = Pt(9)
+            doc.add_paragraph("")
+
+            blocks = _parse_lines(text)
+
+            for block in blocks:
+                t = block["type"]
+
+                if t == "empty":
+                    doc.add_paragraph("")
+
+                elif t in ("title", "heading"):
+                    p = doc.add_heading(block["text"], level=1)
+                    if p.runs:
+                        p.runs[0].font.color.rgb = RGBColor(0x2E, 0x75, 0xB6)
+                        p.runs[0].font.size = Pt(14)
+
+                elif t == "subheading":
+                    p = doc.add_heading(block["text"], level=2)
+                    if p.runs:
+                        p.runs[0].font.color.rgb = RGBColor(0x1F, 0x38, 0x64)
+                        p.runs[0].font.size = Pt(12)
+
+                elif t in ("bullet", "numbered"):
+                    style = "List Bullet" if t == "bullet" else "List Number"
+                    p = doc.add_paragraph(block["text"], style=style)
+                    p.runs[0].font.size = Pt(11)
+
+                elif t == "paragraph":
+                    p = doc.add_paragraph()
+                    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+                    # Procesar negritas e itálicas
+                    raw = block["text"]
+                    parts = re.split(r"(\*\*.*?\*\*|\*.*?\*)", raw)
+                    for part in parts:
+                        if part.startswith("**") and part.endswith("**"):
+                            run = p.add_run(part[2:-2])
+                            run.bold = True
+                        elif part.startswith("*") and part.endswith("*"):
+                            run = p.add_run(part[1:-1])
+                            run.italic = True
+                        else:
+                            run = p.add_run(part)
+                        run.font.size = Pt(11)
+
+            buf = io.BytesIO()
+            doc.save(buf)
+            logger.info("DOCX generado")
+            return buf.getvalue()
+
+        except Exception as exc:
+            logger.error("DOCX generation error: %s", exc)
+            return text.encode()
+
+    @staticmethod
+    def _to_txt(text: str, title: str) -> bytes:
+        header = f"{title}\n{'='*len(title)}\n{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+        return (header + text).encode("utf-8")
+
+    @staticmethod
+    def _to_md(text: str, title: str) -> bytes:
+        header = f"# {title}\n\n_{datetime.now().strftime('%Y-%m-%d %H:%M')}_\n\n"
+        return (header + text).encode("utf-8")
+</file>
+
+<file path="tools/search_tool.py">
+"""
+search_tool.py — Semantic search tool over the RAG knowledge base.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from rag.retriever import DocumentRetriever
+
+logger = get_logger(__name__)
+
+
+class SearchTool:
+    """Exposes RAG retrieval as a named tool."""
+
+    name = "search_tool"
+    description = "Searches the knowledge base for relevant document chunks."
+
+    def __init__(self) -> None:
+        self._retriever = DocumentRetriever()
+
+    def search(self, query: str, k: int = 4) -> list[dict]:
+        """
+        Semantic search over ingested documents.
+
+        Args:
+            query: Search query string.
+            k: Number of results.
+
+        Returns:
+            List of dicts: {content, source, page}.
+        """
+        docs = self._retriever.retrieve(query, k=k)
+        return [
+            {
+                "content": d.page_content,
+                "source": d.metadata.get("source", ""),
+                "page": d.metadata.get("page", ""),
+            }
+            for d in docs
+        ]
+</file>
+
+<file path="ui/__init__.py">
+
+</file>
+
+<file path="ui/chat_interface.py">
+"""
+chat_interface.py — Renders the chat message history and input box.
+"""
+from __future__ import annotations
+
+import streamlit as st
+
+
+def render_messages(messages: list[dict]) -> None:
+    for msg in messages:
+        role = msg["role"]
+        avatar = "🎓" if role == "assistant" else "👤"
+        with st.chat_message(role, avatar=avatar):
+            st.markdown(msg["content"])
+
+
+def render_input() -> str | None:
+    return st.chat_input("Ask CampusMind AI anything…")
+
+
+def render_welcome() -> None:
+    st.markdown(
+        """
+        <div style="text-align:center; padding: 3rem 1rem;">
+            <img src="https://img.icons8.com/fluency/96/graduation-cap.png" width="80"/>
+            <h2 style="margin-top:1rem;">Welcome to CampusMind AI</h2>
+            <p style="color:gray; font-size:1.1rem;">
+                Your intelligent university assistant powered by OpenRouter.<br>
+                Ask questions, upload documents, analyse images, or choose a specialised agent from the sidebar.
+            </p>
+            <hr style="margin: 2rem auto; width: 60%;"/>
+            <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; color:gray;">
+                <div>💬 <strong>General Chat</strong><br>Conversational AI</div>
+                <div>📚 <strong>RAG</strong><br>Document Q&A</div>
+                <div>🎓 <strong>Academic</strong><br>Writing & Citations</div>
+                <div>🔬 <strong>Research</strong><br>Methodology</div>
+                <div>👁️ <strong>Vision</strong><br>OCR & Image Analysis</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+</file>
+
+<file path="ui/sidebar.py">
+"""
+sidebar.py — Streamlit sidebar: model settings, RAG toggle, file uploads.
+"""
+from __future__ import annotations
+
+import streamlit as st
+
+from config.constants import AGENT_ACADEMIC, AGENT_RESEARCH, AGENT_VISION
+from config.settings import settings
+
+
+def render_sidebar() -> dict:
+    with st.sidebar:
+        st.image("https://img.icons8.com/fluency/96/graduation-cap.png", width=60)
+        st.title("CampusMind AI")
+        st.caption("Intelligent University Assistant")
+        st.divider()
+
+        st.subheader("🤖 Model Settings")
+        model = st.selectbox(
+            "LLM Model",
+            options=settings.AVAILABLE_MODELS,
+            index=0,
+            help="Switch between available models",
+        )
+        temperature = st.slider(
+            "Temperature",
+            min_value=0.0,
+            max_value=1.0,
+            value=settings.DEFAULT_TEMPERATURE,
+            step=0.05,
+            help="Higher = more creative; lower = more precise",
+        )
+        st.divider()
+
+        st.subheader("🧠 AI Agent")
+        agent_labels = {
+            "General Chat": None,
+            "🎓 Academic Agent": AGENT_ACADEMIC,
+            "🔬 Research Agent": AGENT_RESEARCH,
+            "👁️ Vision Agent": AGENT_VISION,
+        }
+        selected_label = st.radio(
+            "Active Mode",
+            options=list(agent_labels.keys()),
+            index=0,
+            help="Select a specialised agent or use general chat",
+        )
+        active_agent = agent_labels[selected_label]
+        st.divider()
+
+        st.subheader("📚 Knowledge Base (RAG)")
+        use_rag = st.toggle(
+            "Enable RAG",
+            value=False,
+            help="Use uploaded documents to answer questions",
+        )
+        uploaded_docs = st.file_uploader(
+            "Upload Documents",
+            type=["pdf", "txt", "docx", "csv", "md"],
+            accept_multiple_files=True,
+            help="PDF, TXT, DOCX, CSV, or Markdown files",
+        )
+        st.divider()
+
+        st.subheader("🖼️ Image Analysis")
+        uploaded_images = st.file_uploader(
+            "Upload Images",
+            type=["png", "jpg", "jpeg", "bmp", "webp", "tiff"],
+            accept_multiple_files=True,
+            key="image_uploader",
+            help="Upload images for OCR and analysis",
+        )
+        st.divider()
+
+        clear_chat = st.button("🗑️ Clear Chat", use_container_width=True)
+
+        st.divider()
+        st.caption(f"v{settings.APP_VERSION} · Powered by OpenRouter")
+
+    return {
+        "model": model,
+        "temperature": temperature,
+        "use_rag": use_rag,
+        "active_agent": active_agent,
+        "uploaded_docs": uploaded_docs or [],
+        "uploaded_images": uploaded_images or [],
+        "clear_chat": clear_chat,
+    }
+</file>
+
+<file path="ui/streamlit_ui.py">
+"""
+streamlit_ui.py — Main Streamlit application entry point.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).parent.parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+import streamlit as st
+
+from app.controllers import ChatController
+from config.settings import settings
+from memory.memory_manager import MemoryManager
+from rag.rag_pipeline import RAGPipeline
+from tools.report_tool import ReportTool
+from ui.chat_interface import render_input, render_messages, render_welcome
+from ui.sidebar import render_sidebar
+from ui.upload_interface import (
+    process_document_uploads,
+    process_image_uploads,
+    show_rag_status,
+)
+
+st.set_page_config(
+    page_title="CampusMind AI",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+
+    .stApp {
+        background: #07080f;
+        background-image:
+            radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,60,255,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 85% 90%, rgba(0,200,160,0.10) 0%, transparent 55%);
+    }
+
+    [data-testid="stSidebar"] {
+        background: #0d0e1a !important;
+        border-right: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    [data-testid="stSidebar"] * { color: #c8cce0 !important; }
+    [data-testid="stSidebar"] .stSelectbox label,
+    [data-testid="stSidebar"] .stSlider label {
+        font-size: 0.78rem !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        color: #6b7090 !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 10px !important;
+        color: #e0e3f0 !important;
+    }
+
+    .main-header {
+        background: linear-gradient(135deg,
+            rgba(99,60,255,0.25) 0%,
+            rgba(30,25,80,0.6) 40%,
+            rgba(0,180,140,0.15) 100%);
+        border: 1px solid rgba(99,60,255,0.3);
+        backdrop-filter: blur(20px);
+        color: white;
+        padding: 1.8rem 2.2rem;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 180px; height: 180px;
+        background: radial-gradient(circle, rgba(99,60,255,0.25), transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .main-header h1 {
+        margin: 0;
+        font-family: 'Syne', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(90deg, #fff 40%, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .main-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.65;
+        font-size: 0.88rem;
+        letter-spacing: 0.02em;
+        -webkit-text-fill-color: rgba(255,255,255,0.65);
+    }
+    .main-header strong {
+        -webkit-text-fill-color: #a78bfa;
+        font-weight: 600;
+    }
+
+    [data-testid="metric-container"] {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.07) !important;
+        border-radius: 14px !important;
+        padding: 1rem 1.2rem !important;
+        transition: border-color 0.2s;
+    }
+    [data-testid="metric-container"]:hover { border-color: rgba(99,60,255,0.35) !important; }
+    [data-testid="metric-container"] label {
+        font-size: 0.72rem !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        color: #6b7090 !important;
+        font-weight: 500 !important;
+    }
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        font-family: 'Syne', sans-serif !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: #e8eaf6 !important;
+    }
+
+    [data-testid="stChatMessage"] {
+        background: rgba(255,255,255,0.025) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 16px !important;
+        margin-bottom: 0.75rem !important;
+        padding: 0.2rem 0.5rem !important;
+        transition: background 0.2s;
+    }
+    [data-testid="stChatMessage"]:hover { background: rgba(255,255,255,0.04) !important; }
+    [data-testid="stChatMessage"] p { color: #d4d7ee !important; line-height: 1.7 !important; }
+
+    [data-testid="stChatInput"] {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 16px !important;
+        transition: border-color 0.2s;
+    }
+    [data-testid="stChatInput"]:focus-within {
+        border-color: rgba(99,60,255,0.5) !important;
+        box-shadow: 0 0 0 3px rgba(99,60,255,0.1) !important;
+    }
+    [data-testid="stChatInput"] textarea { color: #e0e3f0 !important; }
+    [data-testid="stChatInput"] textarea::placeholder { color: #4a4e6a !important; }
+
+    hr { border-color: rgba(255,255,255,0.06) !important; margin: 1rem 0 !important; }
+
+    .stButton > button {
+        background: linear-gradient(135deg, #6336ff, #9d6ffa) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        transition: opacity 0.2s, transform 0.15s !important;
+    }
+    .stButton > button:hover { opacity: 0.88 !important; transform: translateY(-1px) !important; }
+
+    [data-testid="stDownloadButton"] > button {
+        background: rgba(99,60,255,0.12) !important;
+        color: #a78bfa !important;
+        border: 1px solid rgba(99,60,255,0.3) !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        width: 100% !important;
+        transition: background 0.2s !important;
+    }
+    [data-testid="stDownloadButton"] > button:hover { background: rgba(99,60,255,0.22) !important; }
+
+    .stSpinner > div { border-top-color: #6336ff !important; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(99,60,255,0.3); border-radius: 10px; }
+
+    [data-testid="stFileUploader"] {
+        background: rgba(255,255,255,0.025) !important;
+        border: 1px dashed rgba(99,60,255,0.3) !important;
+        border-radius: 14px !important;
+        padding: 0.5rem !important;
+    }
+    [data-testid="stFileUploader"] label { color: #8b90b8 !important; }
+
+    [data-testid="stAlert"] {
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,80,80,0.2) !important;
+        background: rgba(255,50,50,0.07) !important;
+    }
+
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    [data-testid="stToolbar"] { display: none; }
+</style>
+""", unsafe_allow_html=True)
+
+
+_PDF_KEYWORDS = [
+    "en pdf", "como pdf", "en formato pdf", "dame pdf", "quiero pdf",
+    "genera pdf", "crea pdf", "crea un pdf", "genera un pdf",
+    "archivo pdf", "documento pdf", "exportar pdf", "export pdf",
+    "generate pdf", "create pdf", "save as pdf", "as pdf",
+]
+_WORD_KEYWORDS = [
+    "en word", "como word", "en formato word", "dame word", "quiero word",
+    "genera word", "crea word", "crea un word", "genera un word",
+    "archivo word", "documento word", "exportar word", "en docx",
+    "formato docx", "generate word", "create word", "save as word", "as word",
+]
+
+_STRIP_KEYWORDS = [
+    "en pdf", "en word", "en formato pdf", "en formato word",
+    "dame pdf", "dame word", "quiero pdf", "quiero word",
+    "crea un", "genera un", "escribe un", "escribe una",
+    "como pdf", "como word", "en docx", "formato docx",
+    "archivo pdf", "archivo word", "exportar pdf", "exportar word",
+]
+
+
+def _detect_doc_format(text: str) -> str | None:
+    t = text.lower()
+    if any(k in t for k in _PDF_KEYWORDS):
+        return "pdf"
+    if any(k in t for k in _WORD_KEYWORDS):
+        return "docx"
+    return None
+
+
+def _extract_title(user_input: str) -> str:
+    titulo = user_input.lower()
+    for kw in _STRIP_KEYWORDS:
+        titulo = titulo.replace(kw, "")
+    titulo = titulo.strip().capitalize()
+    if len(titulo) < 3:
+        titulo = "Documento CampusMind AI"
+    return titulo
+
+
+def _init_session() -> None:
+    if "memory" not in st.session_state:
+        st.session_state.memory = MemoryManager()
+    if "rag" not in st.session_state:
+        st.session_state.rag = RAGPipeline()
+    if "controller" not in st.session_state:
+        st.session_state.controller = ChatController(
+            memory=st.session_state.memory,
+            rag=st.session_state.rag,
+        )
+    if "report_tool" not in st.session_state:
+        st.session_state.report_tool = ReportTool()
+    if "last_model" not in st.session_state:
+        st.session_state.last_model = settings.DEFAULT_MODEL
+    if "last_temp" not in st.session_state:
+        st.session_state.last_temp = settings.DEFAULT_TEMPERATURE
+    if "ocr_context" not in st.session_state:
+        st.session_state.ocr_context = ""
+    if "pending_download" not in st.session_state:
+        st.session_state.pending_download = None
+
+
+def main() -> None:
+    try:
+        settings.validate()
+    except ValueError as exc:
+        st.error(str(exc))
+        st.stop()
+
+    _init_session()
+
+    cfg = render_sidebar()
+
+    if (
+        cfg["model"] != st.session_state.last_model
+        or abs(cfg["temperature"] - st.session_state.last_temp) > 0.01
+    ):
+        st.session_state.controller.update_model(cfg["model"], cfg["temperature"])
+        st.session_state.last_model = cfg["model"]
+        st.session_state.last_temp = cfg["temperature"]
+
+    process_document_uploads(cfg["uploaded_docs"], st.session_state.rag)
+    show_rag_status(st.session_state.rag)
+
+    if cfg["uploaded_images"]:
+        llm = st.session_state.controller._llm
+        image_results = process_image_uploads(cfg["uploaded_images"], llm=llm)
+        if image_results:
+            st.session_state.image_bytes = cfg["uploaded_images"][0].read()
+            cfg["uploaded_images"][0].seek(0)
+            for r in image_results:
+                ocr = r.get("analysis", {}).get("ocr_text", "")
+                if ocr and not ocr.startswith("["):
+                    st.session_state.ocr_context += f"\n\n[{r['filename']}]\n{ocr}"
+
+    agent_label = {
+        None: "Chat general",
+        "academic": "🎓 Agente académico",
+        "research": "🔬 Agente investigador",
+        "vision": "👁️ Agente visión",
+    }.get(cfg["active_agent"], "Chat general")
+
+    rag_badge = "✦ RAG activo" if cfg["use_rag"] else "RAG desactivado"
+    docs_count = len(st.session_state.rag.ingested_files)
+
+    st.markdown(f"""
+    <div class="main-header">
+        <h1>🎓 CampusMind AI</h1>
+        <p>
+            Modo: <strong>{agent_label}</strong> &nbsp;·&nbsp;
+            Modelo: <strong>{cfg['model']}</strong> &nbsp;·&nbsp;
+            <strong>{rag_badge}</strong> &nbsp;·&nbsp;
+            Docs: <strong>{docs_count}</strong>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+    messages = st.session_state.memory.get_display_messages()
+    c1.metric("Mensajes", len(messages))
+    c2.metric("Documentos", docs_count)
+    c3.metric("Modelo", cfg["model"].split("/")[-1].split("-")[0].upper())
+    c4.metric("Temperatura", f"{cfg['temperature']:.2f}")
+
+    st.divider()
+
+    if not messages:
+        render_welcome()
+    else:
+        render_messages(messages)
+
+    if cfg["clear_chat"]:
+        st.session_state.memory.clear()
+        st.session_state.ocr_context = ""
+        st.session_state.pending_download = None
+        st.rerun()
+
+    # ── Botón de descarga persistente (sobrevive el rerun) ────────────────────
+    if st.session_state.get("pending_download"):
+        pd = st.session_state.pending_download
+        st.divider()
+        col1, col2, col3 = st.columns([2, 1, 2])
+        with col2:
+            clicked = st.download_button(
+                label=f"⬇️ Descargar .{pd['fmt']}",
+                data=pd["bytes"],
+                file_name=pd["filename"],
+                mime=pd["mime"],
+                key="persistent_download",
+                use_container_width=True,
+            )
+            if clicked:
+                st.session_state.pending_download = None
+
+    user_input = render_input()
+    if user_input:
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(user_input)
+
+        doc_fmt = _detect_doc_format(user_input)
+
+        with st.chat_message("assistant", avatar="🎓"):
+            with st.spinner("Pensando…"):
+                ctrl: ChatController = st.session_state.controller
+
+                # Si pide documento, instruir al LLM para que genere solo contenido
+                actual_input = user_input
+                if doc_fmt:
+                    tipo = "PDF" if doc_fmt == "pdf" else "Word"
+                    actual_input = (
+                        f"{user_input}\n\n"
+                        f"INSTRUCCIÓN IMPORTANTE: Genera el documento completo con todo "
+                        f"su contenido directamente. Usa formato markdown: "
+                        f"# para título principal, ## para subtítulos, "
+                        f"### para secciones, **negrita** para énfasis, - para listas. "
+                        f"NO digas que no puedes crear archivos {tipo}. "
+                        f"NO pongas frases como 'aquí tienes' o 'a continuación'. "
+                        f"Escribe ÚNICAMENTE el contenido del documento."
+                    )
+
+                if cfg["active_agent"]:
+                    response = ctrl.run_agent(
+                        agent_type=cfg["active_agent"],
+                        user_input=actual_input,
+                        ocr_text=st.session_state.ocr_context,
+                        image_bytes=st.session_state.get("image_bytes"),
+                    )
+                else:
+                    response = ctrl.chat(
+                        user_input=actual_input,
+                        use_rag=cfg["use_rag"],
+                    )
+
+            st.markdown(response)
+
+            if doc_fmt:
+                mime_map = {
+                    "pdf": "application/pdf",
+                    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                }
+                titulo = _extract_title(user_input)
+                doc_bytes = st.session_state.report_tool.generate_report(
+                    content=response,
+                    title=titulo,
+                    fmt=doc_fmt,
+                )
+                st.session_state.pending_download = {
+                    "bytes": doc_bytes,
+                    "fmt": doc_fmt,
+                    "mime": mime_map[doc_fmt],
+                    "filename": f"{titulo[:40].replace(' ', '_')}.{doc_fmt}",
+                }
+
+        st.rerun()
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="ui/upload_interface.py">
+"""
+upload_interface.py — Handles document and image upload UI logic.
+"""
+from __future__ import annotations
+
+import streamlit as st
+
+from config.logger import get_logger
+from rag.rag_pipeline import RAGPipeline
+from tools.image_tool import ImageTool
+
+logger = get_logger(__name__)
+
+
+def process_document_uploads(
+    uploaded_files: list,
+    rag: RAGPipeline,
+    llm=None,
+) -> list[str]:
+    """
+    Ingest uploaded documents into the RAG pipeline.
+
+    Args:
+        uploaded_files: Streamlit UploadedFile objects.
+        rag: Active RAGPipeline instance.
+        llm: Optional LLM for summarisation.
+
+    Returns:
+        List of ingested filenames.
+    """
+    if not uploaded_files:
+        return []
+
+    already_ingested = set(rag.ingested_files)
+    newly_ingested = []
+
+    for f in uploaded_files:
+        if f.name in already_ingested:
+            continue
+        try:
+            with st.spinner(f"Ingesting {f.name}…"):
+                chunks = rag.ingest(f.read(), f.name)
+            st.success(f"✅ {f.name} → {chunks} chunks indexed")
+            newly_ingested.append(f.name)
+            logger.info("Ingested document: %s", f.name)
+        except Exception as exc:
+            st.error(f"❌ Failed to ingest {f.name}: {exc}")
+            logger.error("Ingest error for %s: %s", f.name, exc)
+
+    return newly_ingested
+
+
+def process_image_uploads(uploaded_images: list, llm=None) -> list[dict]:
+    """
+    Run OCR and analysis on uploaded images.
+
+    Args:
+        uploaded_images: Streamlit UploadedFile image objects.
+        llm: Optional LLM for enriched captioning.
+
+    Returns:
+        List of analysis result dicts.
+    """
+    if not uploaded_images:
+        return []
+
+    tool = ImageTool()
+    results = []
+
+    for img_file in uploaded_images:
+        try:
+            img_bytes = img_file.read()
+            with st.spinner(f"Analysing {img_file.name}…"):
+                analysis = tool.analyze(img_bytes)
+                caption = tool.caption(img_bytes, llm=llm)
+
+            with st.expander(f"🖼️ {img_file.name}", expanded=True):
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    st.image(img_bytes, use_container_width=True)
+                with col2:
+                    info = analysis.get("info", {})
+                    st.markdown(f"**Size:** {info.get('width')}×{info.get('height')} px")
+                    st.markdown(f"**Format:** {info.get('format', 'unknown')}")
+                    st.markdown(f"**Description:** {caption}")
+
+                    ocr_text = analysis.get("ocr_text", "")
+                    if ocr_text and not ocr_text.startswith("["):
+                        st.markdown("**OCR Text:**")
+                        st.text_area(
+                            label="",
+                            value=ocr_text,
+                            height=120,
+                            key=f"ocr_{img_file.name}",
+                        )
+
+            results.append({
+                "filename": img_file.name,
+                "analysis": analysis,
+                "caption": caption,
+            })
+        except Exception as exc:
+            st.error(f"❌ Image analysis failed for {img_file.name}: {exc}")
+            logger.error("Image analysis error: %s", exc)
+
+    return results
+
+
+def show_rag_status(rag: RAGPipeline) -> None:
+    """Display the current RAG knowledge base status."""
+    files = rag.ingested_files
+    if files:
+        st.sidebar.markdown("**Indexed documents:**")
+        for f in files:
+            st.sidebar.markdown(f"- 📄 {f}")
+    else:
+        st.sidebar.caption("No documents indexed yet.")
+</file>
+
+<file path="vectorstore/__init__.py">
+
+</file>
+
+<file path="vectorstore/chroma_manager.py">
+"""
+chroma_manager.py — ChromaDB vector store manager.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List
+
+from langchain_community.vectorstores import Chroma
+from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
+
+from config.logger import get_logger
+from config.settings import settings
+
+logger = get_logger(__name__)
+
+
+class ChromaManager:
+    """
+    Manages a ChromaDB vector store (persist on disk).
+    Implements Singleton per collection name.
+    """
+
+    _instances: dict[str, "ChromaManager"] = {}
+
+    def __new__(cls, collection_name: str = "campusmind") -> "ChromaManager":
+        if collection_name not in cls._instances:
+            instance = super().__new__(cls)
+            instance._collection_name = collection_name
+            instance._initialized = False
+            cls._instances[collection_name] = instance
+        return cls._instances[collection_name]
+
+    def __init__(self, collection_name: str = "campusmind") -> None:
+        if self._initialized:
+            return
+        self._initialized = True
+        self._store: Chroma | None = None
+        persist_dir = Path(settings.CHROMA_PERSIST_DIR)
+        persist_dir.mkdir(parents=True, exist_ok=True)
+        self._persist_dir = str(persist_dir)
+        logger.info("ChromaManager ready: collection=%s", collection_name)
+
+    def get_or_create(self, embeddings: Embeddings) -> Chroma:
+        """
+        Return existing store or create a new one.
+
+        Args:
+            embeddings: Embedding function to use.
+
+        Returns:
+            Chroma vector store instance.
+        """
+        if self._store is None:
+            self._store = Chroma(
+                collection_name=self._collection_name,
+                embedding_function=embeddings,
+                persist_directory=self._persist_dir,
+            )
+            logger.info("ChromaDB store created/loaded from %s", self._persist_dir)
+        return self._store
+
+    def add_documents(self, docs: List[Document], embeddings: Embeddings) -> None:
+        """
+        Embed and add documents to the store.
+
+        Args:
+            docs: Document chunks to add.
+            embeddings: Embedding function.
+        """
+        store = self.get_or_create(embeddings)
+        store.add_documents(docs)
+        logger.info("Added %d documents to ChromaDB", len(docs))
+
+    def as_retriever(self, embeddings: Embeddings, k: int | None = None):
+        """
+        Return a retriever interface over the store.
+
+        Args:
+            embeddings: Embedding function.
+            k: Number of results to retrieve.
+
+        Returns:
+            VectorStoreRetriever.
+        """
+        store = self.get_or_create(embeddings)
+        return store.as_retriever(
+            search_kwargs={"k": k or settings.RETRIEVAL_K}
+        )
+
+    def reset(self, embeddings: Embeddings) -> None:
+        """Clear all documents from the collection."""
+        store = self.get_or_create(embeddings)
+        store.delete_collection()
+        self._store = None
+        logger.warning("ChromaDB collection '%s' cleared", self._collection_name)
+</file>
+
+<file path="vectorstore/vector_factory.py">
+"""
+vector_factory.py — Factory for creating vector store backends (Strategy pattern).
+"""
+from __future__ import annotations
+
+from langchain_core.embeddings import Embeddings
+
+from config.constants import VECTOR_BACKEND_CHROMA
+from config.logger import get_logger
+from vectorstore.chroma_manager import ChromaManager
+
+logger = get_logger(__name__)
+
+
+class VectorStoreFactory:
+    """Creates and returns the appropriate vector store backend."""
+
+    @staticmethod
+    def get_manager(backend: str = VECTOR_BACKEND_CHROMA, collection: str = "campusmind"):
+        """
+        Return a vector store manager for the requested backend.
+
+        Args:
+            backend: 'chroma' (default).
+            collection: Collection/index name.
+
+        Returns:
+            ChromaManager instance.
+
+        Raises:
+            ValueError: For unsupported backends.
+        """
+        if backend == VECTOR_BACKEND_CHROMA:
+            logger.debug("Vector backend: ChromaDB (collection=%s)", collection)
+            return ChromaManager(collection_name=collection)
+        raise ValueError(f"Unsupported vector backend: '{backend}'")
+</file>
+
+<file path="vision/__init__.py">
+
+</file>
+
+<file path="vision/image_analysis.py">
+"""
+image_analysis.py — Image description and analysis utilities.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from vision.ocr_engine import OCREngine
+
+logger = get_logger(__name__)
+
+
+class ImageAnalyzer:
+    """
+    Provides image analysis features:
+    - Basic metadata extraction
+    - OCR text extraction
+    - Colour statistics
+    - Simple classification heuristics
+    """
+
+    def __init__(self) -> None:
+        self._ocr = OCREngine()
+
+    def analyze(self, image_bytes: bytes, run_ocr: bool = True) -> dict:
+        """
+        Full image analysis pipeline.
+
+        Args:
+            image_bytes: Raw image data.
+            run_ocr: Whether to run OCR on the image.
+
+        Returns:
+            Analysis dict with keys: info, ocr_text, color_stats, description.
+        """
+        result: dict = {}
+
+        # Basic image info
+        result["info"] = OCREngine.get_image_info(image_bytes)
+
+        # OCR
+        if run_ocr:
+            result["ocr_text"] = self._ocr.extract_text(image_bytes)
+        else:
+            result["ocr_text"] = ""
+
+        # Colour stats
+        result["color_stats"] = self._color_stats(image_bytes)
+
+        # Simple text description
+        result["description"] = self._describe(result)
+
+        return result
+
+    @staticmethod
+    def _color_stats(image_bytes: bytes) -> dict:
+        """Compute basic colour statistics."""
+        try:
+            import io
+            import numpy as np
+            from PIL import Image
+
+            img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            arr = np.array(img)
+            return {
+                "mean_r": float(arr[:, :, 0].mean()),
+                "mean_g": float(arr[:, :, 1].mean()),
+                "mean_b": float(arr[:, :, 2].mean()),
+                "brightness": float(arr.mean()),
+            }
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _describe(analysis: dict) -> str:
+        """Build a plain-English summary of the analysis."""
+        info = analysis.get("info", {})
+        w, h = info.get("width", "?"), info.get("height", "?")
+        fmt = info.get("format", "unknown")
+        ocr = analysis.get("ocr_text", "")
+        stats = analysis.get("color_stats", {})
+        brightness = stats.get("brightness", None)
+
+        desc = f"Image: {w}×{h}px, format={fmt}."
+        if brightness is not None:
+            tone = "bright" if brightness > 128 else "dark"
+            desc += f" Overall tone: {tone} (brightness={brightness:.1f}/255)."
+        if ocr and not ocr.startswith("["):
+            snippet = ocr[:200].replace("\n", " ")
+            desc += f" OCR text found ({len(ocr)} chars): \"{snippet}…\""
+        return desc
+</file>
+
+<file path="vision/image_captioning.py">
+"""
+image_captioning.py — LLM-based image captioning via description prompt.
+"""
+from __future__ import annotations
+
+from config.logger import get_logger
+from vision.image_analysis import ImageAnalyzer
+
+logger = get_logger(__name__)
+
+
+class ImageCaptioner:
+    """
+    Generates natural-language captions for images by combining
+    OCR output and colour analysis, then asking the LLM to describe them.
+    """
+
+    def __init__(self) -> None:
+        self._analyzer = ImageAnalyzer()
+
+    def caption(self, image_bytes: bytes, llm=None) -> str:
+        """
+        Generate a caption for the image.
+
+        Args:
+            image_bytes: Raw image data.
+            llm: Optional LangChain LLM to enrich the caption.
+
+        Returns:
+            Caption string.
+        """
+        analysis = self._analyzer.analyze(image_bytes, run_ocr=True)
+        base_desc = analysis.get("description", "")
+        ocr_text = analysis.get("ocr_text", "")
+
+        if llm is not None:
+            try:
+                prompt = (
+                    f"Describe this image based on the following analysis:\n\n"
+                    f"Technical description: {base_desc}\n"
+                    f"OCR text found: {ocr_text[:500] if ocr_text else 'None'}\n\n"
+                    "Provide a concise, informative description of what this image likely shows."
+                )
+                response = llm.invoke(prompt)
+                caption = response.content if hasattr(response, "content") else str(response)
+                logger.info("LLM caption generated (%d chars)", len(caption))
+                return caption
+            except Exception as exc:
+                logger.warning("LLM captioning failed: %s — using base description", exc)
+
+        return base_desc
+</file>
+
+<file path="vision/ocr_engine.py">
+"""
+ocr_engine.py — OCR extraction using pytesseract (with graceful fallback).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Optional
+
+from config.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class OCREngine:
+    """
+    Extracts text from images using pytesseract.
+    Falls back gracefully if Tesseract binary is not installed.
+    """
+
+    @staticmethod
+    def extract_text(image_bytes: bytes, lang: str = "eng") -> str:
+        """
+        Run OCR on raw image bytes.
+
+        Args:
+            image_bytes: Raw image data (PNG, JPG, etc.).
+            lang: Tesseract language code (e.g. 'eng', 'spa', 'eng+spa').
+
+        Returns:
+            Extracted text string, or an error message if OCR unavailable.
+        """
+        try:
+            import io
+            import pytesseract
+            from PIL import Image
+
+            img = Image.open(io.BytesIO(image_bytes))
+            text = pytesseract.image_to_string(img, lang=lang)
+            logger.info("OCR complete: %d chars extracted", len(text))
+            return text.strip()
+        except ImportError:
+            msg = (
+                "[OCR unavailable] pytesseract is not installed or "
+                "Tesseract binary is missing. Install tesseract-ocr and pytesseract."
+            )
+            logger.warning(msg)
+            return msg
+        except Exception as exc:
+            logger.error("OCR error: %s", exc)
+            return f"[OCR error] {exc}"
+
+    @staticmethod
+    def get_image_info(image_bytes: bytes) -> dict:
+        """
+        Return basic image metadata.
+
+        Args:
+            image_bytes: Raw image data.
+
+        Returns:
+            Dict with width, height, mode, format.
+        """
+        try:
+            import io
+            from PIL import Image
+
+            img = Image.open(io.BytesIO(image_bytes))
+            return {
+                "width": img.width,
+                "height": img.height,
+                "mode": img.mode,
+                "format": img.format or "unknown",
+            }
+        except Exception as exc:
+            logger.error("Image info error: %s", exc)
+            return {}
+</file>
+
+<file path="README.md">
+# CampusMind AI 🎓
+
+**An intelligent multimodal university assistant powered by OpenRouter, OpenAI models, LangChain, and ChromaDB.**
+
+---
+
+## What It Does
+
+CampusMind AI is a private, enterprise-grade AI assistant for universities. It provides:
+
+| Feature | Description |
+|---|---|
+| 💬 **LLM Chat** | Conversational AI with persistent memory |
+| 📚 **RAG** | Document Q&A over PDF, DOCX, TXT, CSV |
+| 🎓 **Academic Agent** | Essay help, citations, concept explanations |
+| 🔬 **Research Agent** | Methodology, literature review, data analysis |
+| 👁️ **Vision Agent** | OCR extraction and image analysis |
+| 💾 **Export** | Download chats as PDF, DOCX, TXT, or Markdown |
+
+---
+
+# Features
+
+- Multi-agent AI architecture
+- Retrieval-Augmented Generation (RAG)
+- Persistent memory with SQLite
+- OCR and image understanding
+- Multimodal AI assistant
+- Vector search using ChromaDB
+- Streamlit web interface
+- PDF, DOCX, TXT, and Markdown export
+- Modular and scalable architecture
+- Enterprise-grade design patterns
+
+---
+
+## Quick Start
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/ferchoriascos445-lang/CampusMind-AI.git
+cd CampusMind-AI
+```
+
+---
+
+### 2. Create virtual environment
+
+#### Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+#### Linux / Mac
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 4. Configure environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+OPENROUTER_API_KEY=your_api_key
+DEFAULT_MODEL=openai/gpt-4o
+DEFAULT_TEMPERATURE=0.7
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+RETRIEVAL_K=4
+```
+
+Get your API key from:
+
+https://openrouter.ai
+
+---
+
+### 5. Launch application
+
+```bash
+streamlit run campusmind/ui/streamlit_ui.py \
+--server.port 8080 \
+--server.address 0.0.0.0 \
+--server.headless true
+```
+
+Open in browser:
+
+```text
+http://localhost:8080
+```
+
+---
+
+# System Architecture
+
+```text
+campusmind/
+├── app/               # Bootstrap, routes, controllers
+├── llm/               # OpenRouter client, prompts, chains
+├── rag/               # RAG pipeline and retrievers
+├── embeddings/        # Embedding manager
+├── vectorstore/       # ChromaDB integration
+├── agents/            # Academic, Research, Vision agents
+├── memory/            # Persistent and session memory
+├── tools/             # OCR, image, search, reports
+├── vision/            # OCR and image processing
+├── ui/                # Streamlit interface
+├── config/            # Settings and logger
+├── database/          # SQLite manager
+├── tests/             # Unit and smoke tests
+└── main.py            # Application entry point
+```
+
+---
+
+# Design Patterns Used
+
+| Pattern | Usage |
+|---|---|
+| Singleton | OpenRouter client, embedding manager |
+| Factory | LLM and vector store creation |
+| Strategy | Swappable LLM providers |
+| Adapter | OCR and search tool wrappers |
+| Observer | Persistent memory event listeners |
+| Facade | MemoryManager and RAGPipeline |
+| LCEL | LangChain composable chains |
+
+---
+
+# RAG Pipeline
+
+## Document Ingestion
+
+```text
+File Upload
+   ↓
+Document Loader
+   ↓
+Document Splitter
+   ↓
+Embedding Manager
+   ↓
+ChromaDB Vector Store
+```
+
+---
+
+## Query Flow
+
+```text
+User Question
+   ↓
+Retriever
+   ↓
+Context Formatter
+   ↓
+LLM Chain
+   ↓
+AI Response
+```
+
+---
+
+# Supported File Types
+
+- PDF
+- DOCX
+- TXT
+- CSV
+- Markdown
+
+---
+
+# Available Models
+
+| Model | Provider | Best Use |
+|---|---|---|
+| openai/gpt-4o | OpenAI | Multimodal reasoning |
+| openai/gpt-4.1 | OpenAI | Coding and analysis |
+| openai/gpt-4.1-mini | OpenAI | Fast responses |
+| openai/gpt-3.5-turbo | OpenAI | Lightweight tasks |
+
+---
+
+# Agents
+
+## AcademicAgent
+
+Capabilities:
+
+- Essay generation
+- Citation formatting
+- Concept explanations
+- Subject tutoring
+
+---
+
+## ResearchAgent
+
+Capabilities:
+
+- Research methodologies
+- Literature review synthesis
+- Statistical interpretation
+- Hypothesis generation
+
+---
+
+## VisionAgent
+
+Capabilities:
+
+- OCR extraction
+- Image understanding
+- Screenshot analysis
+- Multimodal reasoning
+
+---
+
+# Memory System
+
+| Type | Description |
+|---|---|
+| Session Memory | LangChain ChatMessageHistory |
+| Persistent Memory | SQLite database |
+| Session Recovery | Restore previous conversations |
+
+---
+
+# Export Formats
+
+| Format | Library |
+|---|---|
+| PDF | reportlab |
+| DOCX | python-docx |
+| TXT | built-in |
+| Markdown | built-in |
+
+---
+
+# Tech Stack
+
+| Technology | Usage |
+|---|---|
+| OpenRouter | LLM provider |
+| OpenAI Models | GPT-4o, GPT-4.1 |
+| LangChain | AI orchestration |
+| LCEL | Chain composition |
+| ChromaDB | Vector database |
+| SQLite | Persistent memory |
+| Streamlit | Web UI |
+| Pillow | Image processing |
+| pytesseract | OCR |
+| reportlab | PDF generation |
+
+---
+
+# Docker Support
+
+## Build and run
+
+```bash
+docker-compose up --build
+```
+
+---
+
+# Troubleshooting
+
+| Issue | Solution |
+|---|---|
+| OPENROUTER_API_KEY not set | Configure `.env` correctly |
+| OCR not working | Install `tesseract-ocr` |
+| Slow first startup | Embeddings download initially |
+| Streamlit not found | Activate virtual environment |
+
+---
+
+# Security Notes
+
+- Never upload `.env`
+- Always add `.env` to `.gitignore`
+- Rotate exposed API keys immediately
+- Use environment variables for secrets
+
+---
+
+# Future Improvements
+
+- Multi-user authentication
+- Voice assistant support
+- Fine-tuned university models
+- Advanced analytics dashboard
+- Hybrid vector databases
+- Real-time collaboration
+- Agent orchestration system
+
+---
+
+# License
+
+MIT License
+
+---
+
+# Author
+
+Carlos Fernando Paredes Riascos
+
+---
+
+# Screenshots
+
+_Add application screenshots here_
+
+---
+
+# Contributing
+
+Pull requests and contributions are welcome.
+
+1. Fork repository
+2. Create feature branch
+3. Commit changes
+4. Push branch
+5. Open Pull Request
+
+---
+
+# Acknowledgments
+
+- OpenRouter
+- OpenAI
+- LangChain
+- ChromaDB
+- Streamlit
+- Python community
+</file>
+
+</files>

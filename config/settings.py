@@ -14,7 +14,7 @@ class Settings:
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 
     # ── OpenRouter ────────────────────────────────────────────────────────────
-    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
     # ── LLM defaults ──────────────────────────────────────────────────────────
     DEFAULT_MODEL: str = os.getenv(

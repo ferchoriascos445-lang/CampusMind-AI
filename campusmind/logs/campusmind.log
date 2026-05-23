@@ -1,14 +1,281 @@
-2026-05-18 12:23:14 | INFO     | campusmind.llm.groq_client | Initialising GroqClient singleton
-2026-05-18 12:23:18 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
-2026-05-18 12:23:18 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=6616d83c-ff89-455d-aefa-02150b7abb47
-2026-05-18 12:23:18 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
-2026-05-18 12:23:19 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
-2026-05-18 12:23:39 | ERROR    | campusmind.app.controllers | Chat error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
-2026-05-18 12:23:51 | INFO     | campusmind.app.controllers | Model updated: mixtral-8x7b-32768 @ 0.70
-2026-05-18 12:23:54 | ERROR    | campusmind.app.controllers | Chat error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
-2026-05-18 12:40:28 | INFO     | campusmind.llm.groq_client | Initialising GroqClient singleton
-2026-05-18 12:40:30 | INFO     | campusmind.database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
-2026-05-18 12:40:30 | INFO     | campusmind.memory.memory_manager | MemoryManager created: session=172c9248-9016-43b1-8790-02e0f625c69c
-2026-05-18 12:40:30 | INFO     | campusmind.vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
-2026-05-18 12:40:31 | INFO     | campusmind.app.controllers | ChatController initialised: model=llama3-70b-8192 temp=0.70
-2026-05-18 12:40:45 | ERROR    | campusmind.app.controllers | Chat error: Error code: 400 - {'error': {'message': 'The model `llama3-70b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+2026-05-22 08:00:50 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 08:03:42 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 08:03:49 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 08:03:49 | INFO     | memory.memory_manager | MemoryManager created: session=d2d298e6-ab97-4595-a5ae-9fa897a507a3
+2026-05-22 08:03:49 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 08:10:11 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 08:10:16 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 08:10:16 | INFO     | memory.memory_manager | MemoryManager created: session=086901a4-aac8-4c88-ad2c-a4adfe06abf5
+2026-05-22 08:10:16 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 08:15:16 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 08:15:19 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 08:15:19 | INFO     | memory.memory_manager | MemoryManager created: session=1b975340-a195-4d23-99a2-f0557132d008
+2026-05-22 08:15:19 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 08:15:34 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 08:15:58 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 08:16:59 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:16:59 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 08:16:59 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 08:19:02 | INFO     | rag.document_loader | Loading document: guia_spring_boot_completa.pdf (type=pdf)
+2026-05-22 08:19:08 | INFO     | rag.document_loader | Loaded 30 chunks from guia_spring_boot_completa.pdf
+2026-05-22 08:19:08 | INFO     | rag.splitter | Split 30 docs → 76 chunks
+2026-05-22 08:19:15 | INFO     | embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-22 08:19:16 | INFO     | vectorstore.chroma_manager | ChromaDB store created/loaded from campusmind_data\chroma
+2026-05-22 08:19:28 | INFO     | vectorstore.chroma_manager | Added 76 documents to ChromaDB
+2026-05-22 08:19:28 | INFO     | rag.rag_pipeline | Ingested 'guia_spring_boot_completa.pdf' → 76 chunks
+2026-05-22 08:19:28 | INFO     | ui.upload_interface | Ingested document: guia_spring_boot_completa.pdf
+2026-05-22 08:20:08 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:20:08 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 08:20:08 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 08:21:40 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:21:40 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 08:21:40 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 08:22:21 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:22:21 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 08:22:21 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 08:31:29 | INFO     | rag.document_loader | Loading document: Riego y Fertilización Inteligente Ante proyecto.docx (type=docx)
+2026-05-22 08:31:34 | INFO     | rag.document_loader | Loaded 1 chunks from Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 08:31:34 | INFO     | rag.splitter | Split 1 docs → 15 chunks
+2026-05-22 08:31:41 | INFO     | vectorstore.chroma_manager | Added 15 documents to ChromaDB
+2026-05-22 08:31:41 | INFO     | rag.rag_pipeline | Ingested 'Riego y Fertilización Inteligente Ante proyecto.docx' → 15 chunks
+2026-05-22 08:31:41 | INFO     | ui.upload_interface | Ingested document: Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 08:35:55 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:35:56 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:36:00 | INFO     | vision.image_captioning | LLM caption generated (521 chars)
+2026-05-22 08:36:18 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:36:18 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:36:23 | INFO     | vision.image_captioning | LLM caption generated (641 chars)
+2026-05-22 08:36:59 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:36:59 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:37:07 | INFO     | vision.image_captioning | LLM caption generated (590 chars)
+2026-05-22 08:37:08 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:37:08 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 08:37:08 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 08:37:20 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:37:20 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:37:23 | INFO     | vision.image_captioning | LLM caption generated (504 chars)
+2026-05-22 08:37:51 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:37:51 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:38:06 | INFO     | vision.image_captioning | LLM caption generated (690 chars)
+2026-05-22 08:38:07 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:38:07 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 08:38:07 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 08:38:16 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:38:16 | WARNING  | vision.ocr_engine | [OCR unavailable] pytesseract is not installed or Tesseract binary is missing. Install tesseract-ocr and pytesseract.
+2026-05-22 08:38:32 | INFO     | vision.image_captioning | LLM caption generated (999 chars)
+2026-05-22 08:41:44 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 08:41:47 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 08:41:47 | INFO     | memory.memory_manager | MemoryManager created: session=dd95069a-aebe-4c4f-8b69-554d6cf7ec13
+2026-05-22 08:41:47 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 08:41:50 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 08:42:12 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 08:42:53 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:42:54 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:42:56 | INFO     | vision.image_captioning | LLM caption generated (552 chars)
+2026-05-22 08:44:23 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:44:24 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:44:34 | INFO     | vision.image_captioning | LLM caption generated (704 chars)
+2026-05-22 08:44:41 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:44:42 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:44:46 | INFO     | vision.image_captioning | LLM caption generated (687 chars)
+2026-05-22 08:46:32 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:46:33 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:46:49 | INFO     | vision.image_captioning | LLM caption generated (828 chars)
+2026-05-22 08:47:13 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:47:13 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:47:18 | INFO     | vision.image_captioning | LLM caption generated (624 chars)
+2026-05-22 08:47:19 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 08:47:19 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 08:47:19 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 08:47:27 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:47:28 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 08:47:44 | INFO     | vision.image_captioning | LLM caption generated (741 chars)
+2026-05-22 09:13:21 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 09:13:25 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 09:13:25 | INFO     | memory.memory_manager | MemoryManager created: session=7f1d31cc-cef3-4c50-9e71-cca0ce9104eb
+2026-05-22 09:13:25 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 09:13:31 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 09:13:55 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 09:14:52 | INFO     | tools.report_tool | PDF generado: 4376 bytes
+2026-05-22 09:17:29 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:17:29 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:17:36 | INFO     | vision.image_captioning | LLM caption generated (686 chars)
+2026-05-22 09:18:08 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:18:08 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:18:19 | INFO     | vision.image_captioning | LLM caption generated (870 chars)
+2026-05-22 09:18:19 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 09:18:19 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 09:18:19 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 09:18:23 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:18:23 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 09:18:28 | INFO     | vision.image_captioning | LLM caption generated (661 chars)
+2026-05-22 09:19:39 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 09:19:39 | INFO     | agents.research_agent | ResearchAgent initialised
+2026-05-22 09:19:39 | INFO     | agents.agent_manager | Created agent: research
+2026-05-22 09:20:32 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 09:20:32 | INFO     | agents.research_agent | ResearchAgent initialised
+2026-05-22 09:20:32 | INFO     | agents.agent_manager | Created agent: research
+2026-05-22 09:20:35 | INFO     | tools.report_tool | PDF generado: 2021 bytes
+2026-05-22 09:39:54 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 09:39:57 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 09:39:57 | INFO     | memory.memory_manager | MemoryManager created: session=4b200d41-fc6e-403c-b293-facc7549e4e3
+2026-05-22 09:39:57 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 09:40:00 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 09:49:06 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 09:49:28 | INFO     | rag.document_loader | Loading document: Riego y Fertilización Inteligente Ante proyecto.docx (type=docx)
+2026-05-22 09:49:29 | INFO     | rag.document_loader | Loaded 1 chunks from Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 09:49:29 | INFO     | rag.splitter | Split 1 docs → 15 chunks
+2026-05-22 09:49:33 | INFO     | embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-22 09:49:34 | INFO     | vectorstore.chroma_manager | ChromaDB store created/loaded from campusmind_data\chroma
+2026-05-22 09:49:38 | INFO     | vectorstore.chroma_manager | Added 15 documents to ChromaDB
+2026-05-22 09:49:38 | INFO     | rag.rag_pipeline | Ingested 'Riego y Fertilización Inteligente Ante proyecto.docx' → 15 chunks
+2026-05-22 09:49:38 | INFO     | ui.upload_interface | Ingested document: Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 09:50:37 | INFO     | tools.report_tool | PDF generado: 4320 bytes
+2026-05-22 16:40:09 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 16:40:13 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 16:40:13 | INFO     | memory.memory_manager | MemoryManager created: session=57d6d155-6a27-43d1-9708-4ecfdb9b8a4c
+2026-05-22 16:40:13 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 16:40:16 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 16:40:55 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 16:42:08 | INFO     | tools.report_tool | PDF generado: 7143 bytes
+2026-05-22 17:40:45 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 17:40:53 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 17:40:54 | INFO     | memory.memory_manager | MemoryManager created: session=207cc296-623d-499b-ab98-864107cecfd2
+2026-05-22 17:40:54 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 17:41:11 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 17:41:24 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 17:41:57 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:41:58 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:02 | INFO     | vision.image_captioning | LLM caption generated (716 chars)
+2026-05-22 17:42:12 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:12 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:16 | INFO     | vision.image_captioning | LLM caption generated (652 chars)
+2026-05-22 17:42:38 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:38 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:42 | INFO     | vision.image_captioning | LLM caption generated (805 chars)
+2026-05-22 17:42:43 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 17:42:43 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 17:42:43 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 17:42:47 | INFO     | agents.vision_agent | VisionAgent: multimodal response generated
+2026-05-22 17:42:48 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:48 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:42:52 | INFO     | vision.image_captioning | LLM caption generated (793 chars)
+2026-05-22 17:53:58 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 17:54:01 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 17:54:01 | INFO     | memory.memory_manager | MemoryManager created: session=e620f606-1d42-4417-bfc1-b8fd411d12bd
+2026-05-22 17:54:01 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 17:54:04 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 17:54:11 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 17:54:26 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:54:26 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:54:28 | INFO     | vision.image_captioning | LLM caption generated (685 chars)
+2026-05-22 17:55:02 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:55:03 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:55:05 | INFO     | vision.image_captioning | LLM caption generated (834 chars)
+2026-05-22 17:55:06 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 17:55:06 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 17:55:06 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 17:55:15 | INFO     | agents.vision_agent | VisionAgent: multimodal response generated
+2026-05-22 17:55:15 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:55:15 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:55:18 | INFO     | vision.image_captioning | LLM caption generated (678 chars)
+2026-05-22 17:56:32 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:56:32 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:56:35 | INFO     | vision.image_captioning | LLM caption generated (711 chars)
+2026-05-22 17:56:35 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 17:56:35 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 17:56:35 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 17:56:47 | INFO     | agents.vision_agent | VisionAgent: multimodal response generated
+2026-05-22 17:56:48 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:56:48 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 17:56:50 | INFO     | vision.image_captioning | LLM caption generated (708 chars)
+2026-05-22 18:00:03 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:00:03 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:00:06 | INFO     | vision.image_captioning | LLM caption generated (539 chars)
+2026-05-22 18:00:06 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 18:00:06 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 18:00:06 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 18:00:18 | INFO     | agents.vision_agent | VisionAgent: multimodal response generated
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | WARNING  | tools.report_tool | LaTeX→image failed: No module named 'matplotlib'
+2026-05-22 18:00:18 | INFO     | tools.report_tool | PDF generado: 3524 bytes
+2026-05-22 18:00:19 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:00:19 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:00:22 | INFO     | vision.image_captioning | LLM caption generated (670 chars)
+2026-05-22 18:00:56 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:00:56 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:01:00 | INFO     | vision.image_captioning | LLM caption generated (586 chars)
+2026-05-22 18:03:40 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:03:40 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:03:42 | INFO     | vision.image_captioning | LLM caption generated (649 chars)
+2026-05-22 18:04:42 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:04:42 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:04:45 | INFO     | vision.image_captioning | LLM caption generated (589 chars)
+2026-05-22 18:04:45 | ERROR    | app.controllers | Chat error: "Input to ChatPromptTemplate is missing variables {'n\\\\sum x_i^2 - (\\\\sum x_i)^2', 'n\\\\sum x_i y_i - \\\\sum x_i \\\\sum y_i'}.  Expected: ['chat_history', 'date', 'input', 'n\\\\sum x_i y_i - \\\\sum x_i \\\\sum y_i', 'n\\\\sum x_i^2 - (\\\\sum x_i)^2'] Received: ['input', 'chat_history', 'date']\nNote: if you intended {n\\sum x_i^2 - (\\sum x_i)^2} to be part of the string and not a variable, please escape it with double curly braces like: '{{n\\sum x_i^2 - (\\sum x_i)^2}}'.\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT "
+2026-05-22 18:04:45 | INFO     | tools.report_tool | PDF generado: 2283 bytes
+2026-05-22 18:04:46 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:04:46 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:04:51 | INFO     | vision.image_captioning | LLM caption generated (574 chars)
+2026-05-22 18:11:12 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 18:11:14 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 18:11:14 | INFO     | memory.memory_manager | MemoryManager created: session=d702a8ca-5c4f-40a7-aa09-23d272f7c54b
+2026-05-22 18:11:14 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 18:11:16 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 18:11:27 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 18:12:30 | INFO     | tools.report_tool | PDF generado: 43059 bytes
+2026-05-22 18:18:08 | INFO     | llm.openrouter_client | Initialising OpenRouterClient singleton
+2026-05-22 18:18:12 | INFO     | database.sqlite_manager | SQLiteManager ready: ./campusmind_data/history.db
+2026-05-22 18:18:12 | INFO     | memory.memory_manager | MemoryManager created: session=9f5adcf4-04c2-4ae1-b175-a1c0620c98b5
+2026-05-22 18:18:12 | INFO     | vectorstore.chroma_manager | ChromaManager ready: collection=campusmind
+2026-05-22 18:18:16 | INFO     | app.controllers | ChatController initialised: model=meta-llama/llama-3.1-8b-instruct:free temp=0.70
+2026-05-22 18:18:27 | INFO     | app.controllers | Model updated: openai/gpt-4o-mini @ 0.70
+2026-05-22 18:22:05 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 18:22:05 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 18:22:05 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 18:23:55 | INFO     | rag.document_loader | Loading document: Riego y Fertilización Inteligente Ante proyecto.docx (type=docx)
+2026-05-22 18:23:55 | INFO     | rag.document_loader | Loaded 1 chunks from Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 18:23:55 | INFO     | rag.splitter | Split 1 docs → 15 chunks
+2026-05-22 18:23:56 | INFO     | rag.document_loader | Loading document: Riego y Fertilización Inteligente Ante proyecto.docx (type=docx)
+2026-05-22 18:23:56 | INFO     | rag.document_loader | Loaded 1 chunks from Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 18:23:56 | INFO     | rag.splitter | Split 1 docs → 15 chunks
+2026-05-22 18:23:58 | INFO     | embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-22 18:23:58 | INFO     | embeddings.embedding_manager | Using ChromaDB default embeddings (fallback)
+2026-05-22 18:24:00 | INFO     | vectorstore.chroma_manager | ChromaDB store created/loaded from campusmind_data\chroma
+2026-05-22 18:24:04 | INFO     | vectorstore.chroma_manager | Added 15 documents to ChromaDB
+2026-05-22 18:24:04 | INFO     | rag.rag_pipeline | Ingested 'Riego y Fertilización Inteligente Ante proyecto.docx' → 15 chunks
+2026-05-22 18:24:04 | INFO     | ui.upload_interface | Ingested document: Riego y Fertilización Inteligente Ante proyecto.docx
+2026-05-22 18:24:34 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 18:24:34 | INFO     | agents.academic_agent | AcademicAgent initialised
+2026-05-22 18:24:34 | INFO     | agents.agent_manager | Created agent: academic
+2026-05-22 18:27:35 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 18:27:35 | INFO     | agents.research_agent | ResearchAgent initialised
+2026-05-22 18:27:35 | INFO     | agents.agent_manager | Created agent: research
+2026-05-22 18:29:29 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:29:29 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:29:30 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:29:30 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:29:35 | INFO     | vision.image_captioning | LLM caption generated (816 chars)
+2026-05-22 18:29:35 | INFO     | vision.image_captioning | LLM caption generated (605 chars)
+2026-05-22 18:30:06 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:30:07 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:30:12 | INFO     | vision.image_captioning | LLM caption generated (770 chars)
+2026-05-22 18:30:12 | INFO     | agents.agent_manager | AgentManager initialised
+2026-05-22 18:30:12 | INFO     | agents.vision_agent | VisionAgent initialised
+2026-05-22 18:30:12 | INFO     | agents.agent_manager | Created agent: vision
+2026-05-22 18:30:22 | INFO     | agents.vision_agent | VisionAgent: multimodal response generated
+2026-05-22 18:30:23 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:30:23 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:30:27 | INFO     | vision.image_captioning | LLM caption generated (729 chars)
+2026-05-22 18:35:38 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:35:38 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:35:43 | INFO     | vision.image_captioning | LLM caption generated (741 chars)
+2026-05-22 18:35:43 | INFO     | memory.memory_manager | In-session memory cleared for session=9f5adcf4-04c2-4ae1-b175-a1c0620c98b5
+2026-05-22 18:35:44 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:35:44 | ERROR    | vision.ocr_engine | OCR error: tesseract is not installed or it's not in your PATH. See README file for more information.
+2026-05-22 18:35:47 | INFO     | vision.image_captioning | LLM caption generated (678 chars)
+2026-05-22 18:36:00 | INFO     | memory.memory_manager | In-session memory cleared for session=9f5adcf4-04c2-4ae1-b175-a1c0620c98b5

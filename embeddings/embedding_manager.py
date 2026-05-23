@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from langchain_core.embeddings import Embeddings
 
-from campusmind.config.logger import get_logger
-from campusmind.config.settings import settings
+from config.logger import get_logger
+from config.settings import settings
 
 logger = get_logger(__name__)
 

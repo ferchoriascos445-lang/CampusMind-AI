@@ -3,6 +3,15 @@ prompts.py — Centralised prompt templates for all agents and chains.
 """
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+_LATEX_INSTRUCTION = """
+When the user requests mathematical formulas or equations:
+- Use $$ ... $$ for block equations (centered, large)
+- Use $ ... $ for inline math within text
+- Always render formulas in proper LaTeX notation
+- Example block: $$m = \\frac{{n\\sum x_i y_i - \\sum x_i \\sum y_i}}{{n\\sum x_i^2 - (\\sum x_i)^2}}$$
+- Example inline: The slope is $m$ and intercept is $b$
+"""
+
 # ── General conversational assistant ──────────────────────────────────────────
 GENERAL_SYSTEM = """You are CampusMind AI, an advanced intelligent assistant for universities.
 You help students, professors, and researchers with academic tasks, research queries,
@@ -10,7 +19,7 @@ document analysis, and knowledge retrieval.
 
 Be precise, helpful, and academically rigorous. When you don't know something, say so.
 Always cite relevant context from documents when available.
-
+""" + _LATEX_INSTRUCTION + """
 Current date: {date}
 """
 
@@ -30,7 +39,7 @@ Always indicate when you are using information from the documents vs. your gener
 
 Context from documents:
 {context}
-
+""" + _LATEX_INSTRUCTION + """
 Current date: {date}
 """
 
@@ -50,7 +59,7 @@ Your expertise includes:
 - Answering subject-specific questions across disciplines
 
 Always provide well-structured, academically rigorous responses.
-"""
+""" + _LATEX_INSTRUCTION
 
 ACADEMIC_PROMPT = ChatPromptTemplate.from_messages([
     ("system", ACADEMIC_SYSTEM),
@@ -69,7 +78,7 @@ Your expertise includes:
 - Statistical concepts and their application
 
 Provide thorough, evidence-based responses suitable for academic research contexts.
-"""
+""" + _LATEX_INSTRUCTION
 
 RESEARCH_PROMPT = ChatPromptTemplate.from_messages([
     ("system", RESEARCH_SYSTEM),
@@ -81,7 +90,8 @@ RESEARCH_PROMPT = ChatPromptTemplate.from_messages([
 VISION_SYSTEM = """You are a Vision Agent that analyzes images and extracted text.
 When presented with OCR output or image descriptions, help the user understand,
 summarize, and work with the visual content.
-"""
+If the image contains mathematical formulas or equations, transcribe and explain them.
+""" + _LATEX_INSTRUCTION
 
 VISION_PROMPT = ChatPromptTemplate.from_messages([
     ("system", VISION_SYSTEM),
@@ -94,7 +104,7 @@ SUMMARISE_SYSTEM = """You are a document summarisation expert.
 Produce a clear, structured summary of the provided document content.
 Include: main topics, key findings, important details, and conclusions.
 Format the summary with headers and bullet points for clarity.
-"""
+""" + _LATEX_INSTRUCTION
 
 SUMMARISE_PROMPT = ChatPromptTemplate.from_messages([
     ("system", SUMMARISE_SYSTEM),

@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import uuid
 
-from campusmind.config.logger import get_logger
-from campusmind.memory.chat_memory import ChatMemory
-from campusmind.memory.persistent_memory import PersistentMemory
+from config.logger import get_logger
+from memory.chat_memory import ChatMemory
+from memory.persistent_memory import PersistentMemory
 
 logger = get_logger(__name__)
 

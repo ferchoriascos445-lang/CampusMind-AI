@@ -6,8 +6,8 @@ from __future__ import annotations
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 
-from campusmind.config.logger import get_logger
-from campusmind.llm.prompts import RESEARCH_PROMPT
+from config.logger import get_logger
+from llm.prompts import RESEARCH_PROMPT
 
 logger = get_logger(__name__)
 

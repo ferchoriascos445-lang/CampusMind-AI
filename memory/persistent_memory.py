@@ -6,9 +6,9 @@ from __future__ import annotations
 import json
 from datetime import datetime
 
-from campusmind.config.logger import get_logger
-from campusmind.config.settings import settings
-from campusmind.database.sqlite_manager import SQLiteManager
+from config.logger import get_logger
+from config.settings import settings
+from database.sqlite_manager import SQLiteManager
 
 logger = get_logger(__name__)
 

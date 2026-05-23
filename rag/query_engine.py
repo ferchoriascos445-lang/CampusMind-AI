@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from langchain_core.language_models import BaseChatModel
 
-from campusmind.config.logger import get_logger
-from campusmind.llm.chains import build_rag_chain
-from campusmind.rag.retriever import DocumentRetriever
+from config.logger import get_logger
+from llm.chains import build_rag_chain
+from rag.retriever import DocumentRetriever
 
 logger = get_logger(__name__)
 

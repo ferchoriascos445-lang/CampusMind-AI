@@ -3,9 +3,9 @@ image_tool.py — Tool for image analysis and captioning.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
-from campusmind.vision.image_analysis import ImageAnalyzer
-from campusmind.vision.image_captioning import ImageCaptioner
+from config.logger import get_logger
+from vision.image_analysis import ImageAnalyzer
+from vision.image_captioning import ImageCaptioner
 
 logger = get_logger(__name__)
 

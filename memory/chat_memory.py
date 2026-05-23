@@ -6,7 +6,7 @@ from __future__ import annotations
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.messages import AIMessage, HumanMessage
 
-from campusmind.config.logger import get_logger
+from config.logger import get_logger
 
 logger = get_logger(__name__)
 

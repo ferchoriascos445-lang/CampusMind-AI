@@ -9,8 +9,8 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 
-from campusmind.config.logger import get_logger
-from campusmind.llm.prompts import (
+from config.logger import get_logger
+from llm.prompts import (
     GENERAL_PROMPT,
     RAG_PROMPT,
     SUMMARISE_PROMPT,

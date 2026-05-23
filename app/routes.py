@@ -4,7 +4,7 @@ routes.py — Route definitions mapping paths to controllers.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
+from config.logger import get_logger
 
 logger = get_logger(__name__)
 

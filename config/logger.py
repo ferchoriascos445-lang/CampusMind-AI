@@ -6,7 +6,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from campusmind.config.settings import settings
+from config.settings import settings
 
 
 def get_logger(name: str) -> logging.Logger:

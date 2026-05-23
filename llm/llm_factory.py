@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from langchain_core.language_models import BaseChatModel
 
-from campusmind.config.logger import get_logger
-from campusmind.config.settings import settings
-from campusmind.llm.openrouter_client import OpenRouterClient
+from config.logger import get_logger
+from config.settings import settings
+from llm.openrouter_client import OpenRouterClient
 
 logger = get_logger(__name__)
 

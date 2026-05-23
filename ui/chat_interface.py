@@ -2,8 +2,58 @@
 chat_interface.py — Renders the chat message history and input box.
 """
 from __future__ import annotations
-
+import re
 import streamlit as st
+
+
+def _render_content(content: str) -> None:
+    """
+    Renderiza el contenido de un mensaje detectando bloques LaTeX y texto normal.
+    
+    Soporta:
+    - Bloques LaTeX: $$...$$  o  \\[...\\]
+    - Inline LaTeX: $...$  o  \\(...\\)
+    - Texto markdown normal
+    """
+    # Separar por bloques LaTeX de bloque ($$...$$)
+    parts = re.split(r'(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\])', content)
+    
+    for part in parts:
+        if not part.strip():
+            continue
+        
+        # Bloque LaTeX $$...$$ o \[...\]
+        if (part.startswith('$$') and part.endswith('$$')):
+            formula = part[2:-2].strip()
+            st.latex(formula)
+        elif (part.startswith('\\[') and part.endswith('\\]')):
+            formula = part[2:-2].strip()
+            st.latex(formula)
+        else:
+            # Dentro del texto normal, buscar inline LaTeX $...$ o \(...\)
+            # y renderizar mezclando markdown con st.latex
+            inline_parts = re.split(r'(\$[^$\n]+?\$|\\\([\s\S]*?\\\))', part)
+            
+            has_inline = any(
+                (p.startswith('$') and p.endswith('$') and len(p) > 2) or
+                (p.startswith('\\(') and p.endswith('\\)'))
+                for p in inline_parts
+            )
+            
+            if has_inline:
+                for ip in inline_parts:
+                    if not ip:
+                        continue
+                    if ip.startswith('$') and ip.endswith('$') and len(ip) > 2:
+                        formula = ip[1:-1].strip()
+                        st.latex(formula)
+                    elif ip.startswith('\\(') and ip.endswith('\\)'):
+                        formula = ip[2:-2].strip()
+                        st.latex(formula)
+                    elif ip.strip():
+                        st.markdown(ip)
+            else:
+                st.markdown(part)
 
 
 def render_messages(messages: list[dict]) -> None:
@@ -11,7 +61,7 @@ def render_messages(messages: list[dict]) -> None:
         role = msg["role"]
         avatar = "🎓" if role == "assistant" else "👤"
         with st.chat_message(role, avatar=avatar):
-            st.markdown(msg["content"])
+            _render_content(msg["content"])
 
 
 def render_input() -> str | None:

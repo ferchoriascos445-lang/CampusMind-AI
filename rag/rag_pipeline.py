@@ -7,12 +7,12 @@ from typing import List
 
 from langchain_core.documents import Document
 
-from campusmind.config.logger import get_logger
-from campusmind.embeddings.embedding_manager import EmbeddingManager
-from campusmind.rag.document_loader import DocumentLoader
-from campusmind.rag.retriever import DocumentRetriever
-from campusmind.rag.splitter import DocumentSplitter
-from campusmind.vectorstore.vector_factory import VectorStoreFactory
+from config.logger import get_logger
+from embeddings.embedding_manager import EmbeddingManager
+from rag.document_loader import DocumentLoader
+from rag.retriever import DocumentRetriever
+from rag.splitter import DocumentSplitter
+from vectorstore.vector_factory import VectorStoreFactory
 
 logger = get_logger(__name__)
 _em = EmbeddingManager()

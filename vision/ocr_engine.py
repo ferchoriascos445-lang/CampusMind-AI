@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from campusmind.config.logger import get_logger
+from config.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -3,8 +3,8 @@ search_tool.py — Semantic search tool over the RAG knowledge base.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
-from campusmind.rag.retriever import DocumentRetriever
+from config.logger import get_logger
+from rag.retriever import DocumentRetriever
 
 logger = get_logger(__name__)
 

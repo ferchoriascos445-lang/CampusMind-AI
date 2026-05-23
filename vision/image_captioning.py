@@ -3,8 +3,8 @@ image_captioning.py — LLM-based image captioning via description prompt.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
-from campusmind.vision.image_analysis import ImageAnalyzer
+from config.logger import get_logger
+from vision.image_analysis import ImageAnalyzer
 
 logger = get_logger(__name__)
 

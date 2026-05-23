@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from langchain_core.embeddings import Embeddings
 
-from campusmind.config.constants import VECTOR_BACKEND_CHROMA
-from campusmind.config.logger import get_logger
-from campusmind.vectorstore.chroma_manager import ChromaManager
+from config.constants import VECTOR_BACKEND_CHROMA
+from config.logger import get_logger
+from vectorstore.chroma_manager import ChromaManager
 
 logger = get_logger(__name__)
 

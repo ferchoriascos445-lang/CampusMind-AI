@@ -3,8 +3,8 @@ document_tool.py — Tool for loading and summarising documents.
 """
 from __future__ import annotations
 
-from campusmind.config.logger import get_logger
-from campusmind.rag.document_loader import DocumentLoader
+from config.logger import get_logger
+from rag.document_loader import DocumentLoader
 
 logger = get_logger(__name__)
 
