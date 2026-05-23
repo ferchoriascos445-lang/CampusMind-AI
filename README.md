@@ -1,353 +1,287 @@
-# CampusMind AI 🎓
+<div align="center">
 
-**An intelligent multimodal university assistant powered by OpenRouter, OpenAI models, LangChain, and ChromaDB.**
+# 🎓 CampusMind AI
+
+**Asistente universitario inteligente con IA multimodal**
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.35%2B-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![LangChain](https://img.shields.io/badge/LangChain-1.0%2B-1C3D5A?logo=chainlink&logoColor=white)](https://langchain.com)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-API-6336FF)](https://openrouter.ai)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+*Chatea con tus documentos, analiza imágenes y genera reportes académicos con IA — todo desde una sola interfaz web.*
+
+</div>
 
 ---
 
-## What It Does
+## ✨ Características principales
 
-CampusMind AI is a private, enterprise-grade AI assistant for universities. It provides:
-
-| Feature | Description |
+| Funcionalidad | Descripción |
 |---|---|
-| 💬 **LLM Chat** | Conversational AI with persistent memory |
-| 📚 **RAG** | Document Q&A over PDF, DOCX, TXT, CSV |
-| 🎓 **Academic Agent** | Essay help, citations, concept explanations |
-| 🔬 **Research Agent** | Methodology, literature review, data analysis |
-| 👁️ **Vision Agent** | OCR extraction and image analysis |
-| 💾 **Export** | Download chats as PDF, DOCX, TXT, or Markdown |
+| 💬 **Chat con IA** | Conversación en lenguaje natural con modelos LLaMA, Mistral y GPT-4o |
+| 📚 **RAG — Document Q&A** | Sube PDFs, Word, CSV o TXT y hazles preguntas directamente |
+| 🎓 **Agente Académico** | Redacción de ensayos, citas APA/MLA/Chicago, explicación de conceptos |
+| 🔬 **Agente de Investigación** | Diseño metodológico, análisis estadístico, literatura científica |
+| 👁️ **Agente de Visión** | Análisis de imágenes, OCR y resolución de ecuaciones matemáticas |
+| 📄 **Exportación** | Genera reportes en PDF y Word con fórmulas LaTeX renderizadas |
+| 🔁 **Multi-modelo** | Cambia de modelo LLM en tiempo real desde la barra lateral |
+| 💾 **Historial persistente** | Las conversaciones se guardan en SQLite entre sesiones |
 
 ---
 
-# Features
+## 🏗️ Arquitectura
 
-- Multi-agent AI architecture
-- Retrieval-Augmented Generation (RAG)
-- Persistent memory with SQLite
-- OCR and image understanding
-- Multimodal AI assistant
-- Vector search using ChromaDB
-- Streamlit web interface
-- PDF, DOCX, TXT, and Markdown export
-- Modular and scalable architecture
-- Enterprise-grade design patterns
+```
+CampusMind AI
+├── ui/                     # Interfaz Streamlit
+│   ├── streamlit_ui.py     # Punto de entrada principal
+│   ├── sidebar.py          # Panel lateral (modelos, agentes, RAG)
+│   ├── chat_interface.py   # Renderizado de mensajes y LaTeX
+│   └── upload_interface.py # Carga y procesamiento de archivos
+│
+├── app/
+│   └── controllers.py      # Lógica de negocio (chat, RAG, agentes)
+│
+├── agents/
+│   ├── agent_manager.py    # Factory de agentes
+│   ├── academic_agent.py   # Agente académico
+│   ├── research_agent.py   # Agente de investigación
+│   └── vision_agent.py     # Agente de visión multimodal
+│
+├── llm/
+│   ├── llm_factory.py      # Factory pattern para el LLM
+│   ├── openrouter_client.py# Cliente OpenRouter (Singleton + reintentos)
+│   ├── chains.py           # Cadenas LCEL
+│   └── prompts.py          # Plantillas de prompts centralizadas
+│
+├── rag/
+│   └── rag_pipeline.py     # Pipeline RAG completo
+│
+├── embeddings/
+│   └── embedding_manager.py# Gestor de embeddings (Singleton)
+│
+├── vectorstore/
+│   └── chroma_manager.py   # ChromaDB manager
+│
+├── memory/
+│   └── memory_manager.py   # Memoria de conversación
+│
+├── database/
+│   └── sqlite_manager.py   # Persistencia SQLite
+│
+├── vision/
+│   ├── image_analysis.py   # Análisis técnico de imágenes
+│   ├── image_captioning.py # Generación de descripciones
+│   └── ocr_engine.py       # Extracción de texto (tesseract)
+│
+├── tools/
+│   ├── report_tool.py      # Exportación PDF/DOCX con LaTeX
+│   └── image_tool.py       # Herramienta de análisis visual
+│
+└── config/
+    ├── settings.py         # Configuración centralizada (.env)
+    └── logger.py           # Logger estructurado
+```
 
 ---
 
-## Quick Start
+## 🚀 Instalación rápida
 
-### 1. Clone repository
+### Requisitos previos
+
+- Python 3.10 o superior
+- Cuenta en [OpenRouter](https://openrouter.ai) (tiene modelos gratuitos)
+- *(Opcional)* [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) para extracción de texto en imágenes
+
+### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/ferchoriascos445-lang/CampusMind-AI.git
+https://github.com/ferchoriascos445-lang/CampusMind-AI.git
 cd CampusMind-AI
 ```
 
----
-
-### 2. Create virtual environment
-
-#### Windows
+### 2. Crear entorno virtual
 
 ```bash
-python -m venv venv
+# Windows
+python -m venv venv --without-pip
 venv\Scripts\activate
-```
+python -m ensurepip
 
-#### Linux / Mac
-
-```bash
+# macOS / Linux
 python3 -m venv venv
 source venv/bin/activate
 ```
 
----
-
-### 3. Install dependencies
+### 3. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
+
+# Para soporte de fórmulas LaTeX en documentos exportados
+pip install matplotlib
+
+# Para OCR en imágenes (opcional)
+pip install pytesseract
 ```
 
----
+### 4. Configurar variables de entorno
 
-### 4. Configure environment variables
-
-Create a `.env` file in the root directory:
+Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-OPENROUTER_API_KEY=your_api_key
-DEFAULT_MODEL=openai/gpt-4o
+# Obligatorio — obtén tu clave en https://openrouter.ai/keys
+OPENAI_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Opcionales — tienen valores por defecto
+DEFAULT_MODEL=meta-llama/llama-3.1-8b-instruct:free
 DEFAULT_TEMPERATURE=0.7
+MAX_TOKENS=4096
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=200
 RETRIEVAL_K=4
 ```
 
-Get your API key from:
-
-https://openrouter.ai
-
----
-
-### 5. Launch application
+### 5. Lanzar la aplicación
 
 ```bash
-streamlit run campusmind/ui/streamlit_ui.py \
---server.port 8080 \
---server.address 0.0.0.0 \
---server.headless true
+# Windows
+$env:PYTHONPATH = $PWD
+streamlit run ui\streamlit_ui.py --server.port 8080
+
+# macOS / Linux
+PYTHONPATH=. streamlit run ui/streamlit_ui.py --server.port 8080
 ```
 
-Open in browser:
-
-```text
-http://localhost:8080
-```
+Abre tu navegador en **http://localhost:8080**
 
 ---
 
-# System Architecture
-
-```text
-campusmind/
-├── app/               # Bootstrap, routes, controllers
-├── llm/               # OpenRouter client, prompts, chains
-├── rag/               # RAG pipeline and retrievers
-├── embeddings/        # Embedding manager
-├── vectorstore/       # ChromaDB integration
-├── agents/            # Academic, Research, Vision agents
-├── memory/            # Persistent and session memory
-├── tools/             # OCR, image, search, reports
-├── vision/            # OCR and image processing
-├── ui/                # Streamlit interface
-├── config/            # Settings and logger
-├── database/          # SQLite manager
-├── tests/             # Unit and smoke tests
-└── main.py            # Application entry point
-```
-
----
-
-# Design Patterns Used
-
-| Pattern | Usage |
-|---|---|
-| Singleton | OpenRouter client, embedding manager |
-| Factory | LLM and vector store creation |
-| Strategy | Swappable LLM providers |
-| Adapter | OCR and search tool wrappers |
-| Observer | Persistent memory event listeners |
-| Facade | MemoryManager and RAGPipeline |
-| LCEL | LangChain composable chains |
-
----
-
-# RAG Pipeline
-
-## Document Ingestion
-
-```text
-File Upload
-   ↓
-Document Loader
-   ↓
-Document Splitter
-   ↓
-Embedding Manager
-   ↓
-ChromaDB Vector Store
-```
-
----
-
-## Query Flow
-
-```text
-User Question
-   ↓
-Retriever
-   ↓
-Context Formatter
-   ↓
-LLM Chain
-   ↓
-AI Response
-```
-
----
-
-# Supported File Types
-
-- PDF
-- DOCX
-- TXT
-- CSV
-- Markdown
-
----
-
-# Available Models
-
-| Model | Provider | Best Use |
-|---|---|---|
-| openai/gpt-4o | OpenAI | Multimodal reasoning |
-| openai/gpt-4.1 | OpenAI | Coding and analysis |
-| openai/gpt-4.1-mini | OpenAI | Fast responses |
-| openai/gpt-3.5-turbo | OpenAI | Lightweight tasks |
-
----
-
-# Agents
-
-## AcademicAgent
-
-Capabilities:
-
-- Essay generation
-- Citation formatting
-- Concept explanations
-- Subject tutoring
-
----
-
-## ResearchAgent
-
-Capabilities:
-
-- Research methodologies
-- Literature review synthesis
-- Statistical interpretation
-- Hypothesis generation
-
----
-
-## VisionAgent
-
-Capabilities:
-
-- OCR extraction
-- Image understanding
-- Screenshot analysis
-- Multimodal reasoning
-
----
-
-# Memory System
-
-| Type | Description |
-|---|---|
-| Session Memory | LangChain ChatMessageHistory |
-| Persistent Memory | SQLite database |
-| Session Recovery | Restore previous conversations |
-
----
-
-# Export Formats
-
-| Format | Library |
-|---|---|
-| PDF | reportlab |
-| DOCX | python-docx |
-| TXT | built-in |
-| Markdown | built-in |
-
----
-
-# Tech Stack
-
-| Technology | Usage |
-|---|---|
-| OpenRouter | LLM provider |
-| OpenAI Models | GPT-4o, GPT-4.1 |
-| LangChain | AI orchestration |
-| LCEL | Chain composition |
-| ChromaDB | Vector database |
-| SQLite | Persistent memory |
-| Streamlit | Web UI |
-| Pillow | Image processing |
-| pytesseract | OCR |
-| reportlab | PDF generation |
-
----
-
-# Docker Support
-
-## Build and run
+## 🐳 Despliegue con Docker
 
 ```bash
+# Construir y levantar
 docker-compose up --build
+
+# En segundo plano
+docker-compose up -d
 ```
 
+La aplicación estará disponible en **http://localhost:8080**
+
+> ℹ️ Agrega `OPENAI_API_KEY=tu_clave` en el archivo `docker-compose.yml` o en un archivo `.env` antes de levantar el contenedor.
+
 ---
 
-# Troubleshooting
+## 🧠 Modelos LLM disponibles
 
-| Issue | Solution |
+| Modelo | Proveedor | Visión | Costo |
+|---|---|---|---|
+| `meta-llama/llama-3.1-8b-instruct:free` | Meta AI | ❌ | Gratis |
+| `mistralai/mistral-7b-instruct:free` | Mistral AI | ❌ | Gratis |
+| `meta-llama/llama-3.2-11b-vision-instruct` | Meta AI | ✅ | Bajo |
+| `meta-llama/llama-3.1-70b-instruct` | Meta AI | ❌ | Medio |
+| `openai/gpt-4o-mini` | OpenAI | ✅ | Medio |
+
+> 💡 Para análisis de imágenes usa `openai/gpt-4o-mini` o `llama-3.2-11b-vision-instruct`. El resto de los agentes funcionan con cualquier modelo.
+
+---
+
+## 📖 Cómo usar
+
+### Chat con documentos (RAG)
+
+1. Activa **Enable RAG** en la barra lateral
+2. Sube un documento en **Upload Documents** (PDF, Word, CSV, TXT)
+3. Escribe tu pregunta — el sistema busca en el documento antes de responder
+
+### Agentes especializados
+
+Selecciona el agente desde la barra lateral:
+
+- **Academic Agent** — *"Escribe un ensayo sobre la inteligencia artificial con citas APA"*
+- **Research Agent** — *"Diseña la metodología para una investigación cuantitativa sobre..."*
+- **Vision Agent** — Sube una imagen y pregunta *"¿Qué ecuaciones aparecen en esta imagen?"*
+
+### Exportar documentos
+
+Agrega `en PDF` o `en Word` a cualquier solicitud:
+
+```
+Escribe un resumen de métodos numéricos con sus fórmulas en LaTeX en PDF
+```
+
+El archivo aparecerá con un botón de descarga directamente en el chat.
+
+---
+
+## ⚙️ Configuración avanzada
+
+| Variable | Valor por defecto | Descripción |
+|---|---|---|
+| `DEFAULT_MODEL` | `llama-3.1-8b-instruct:free` | Modelo LLM inicial |
+| `DEFAULT_TEMPERATURE` | `0.7` | Creatividad del modelo (0.0–1.0) |
+| `MAX_TOKENS` | `4096` | Máximo de tokens por respuesta |
+| `CHUNK_SIZE` | `1000` | Tamaño de fragmentos para RAG |
+| `CHUNK_OVERLAP` | `200` | Solapamiento entre fragmentos |
+| `RETRIEVAL_K` | `4` | Número de fragmentos recuperados |
+| `CHROMA_PERSIST_DIR` | `./campusmind_data/chroma` | Directorio de ChromaDB |
+| `SQLITE_DB_PATH` | `./campusmind_data/history.db` | Base de datos de historial |
+
+---
+
+## 🛠️ Stack tecnológico
+
+| Capa | Tecnología |
 |---|---|
-| OPENROUTER_API_KEY not set | Configure `.env` correctly |
-| OCR not working | Install `tesseract-ocr` |
-| Slow first startup | Embeddings download initially |
-| Streamlit not found | Activate virtual environment |
+| Interfaz web | Streamlit ≥ 1.35 |
+| Orquestación IA | LangChain ≥ 1.0 + LCEL |
+| Proveedor LLM | OpenRouter API |
+| Base vectorial | ChromaDB ≥ 0.5 |
+| Embeddings | all-MiniLM-L6-v2 (SentenceTransformers) |
+| Persistencia | SQLite 3 |
+| Exportación | reportlab + python-docx |
+| Fórmulas LaTeX | matplotlib |
+| Visión / OCR | Pillow + pytesseract |
+| Resiliencia | tenacity ≥ 8.2 |
+| Contenedor | Docker + Docker Compose |
 
 ---
 
-# Security Notes
+## 🎨 Patrones de diseño
 
-- Never upload `.env`
-- Always add `.env` to `.gitignore`
-- Rotate exposed API keys immediately
-- Use environment variables for secrets
-
----
-
-# Future Improvements
-
-- Multi-user authentication
-- Voice assistant support
-- Fine-tuned university models
-- Advanced analytics dashboard
-- Hybrid vector databases
-- Real-time collaboration
-- Agent orchestration system
+- **Singleton** — `OpenRouterClient` y `EmbeddingManager`
+- **Factory** — `LLMFactory` y `AgentManager`
+- **Strategy** — intercambio de modelo LLM en tiempo de ejecución
+- **Facade** — `RAGPipeline` y `MemoryManager`
+- **Observer** — memoria persistente de conversación
+- **Adapter** — herramientas OCR y búsqueda con interfaz uniforme
 
 ---
 
-# License
+## 🤝 Contribuciones
 
-MIT License
+Las contribuciones son bienvenidas. Por favor:
 
----
-
-# Author
-
-Carlos Fernando Paredes Riascos
-
----
-
-# Screenshots
-
-_Add application screenshots here_
+1. Haz un fork del repositorio
+2. Crea una rama: `git checkout -b feature/nueva-funcionalidad`
+3. Realiza tus cambios y haz commit: `git commit -m "feat: descripción"`
+4. Sube tu rama: `git push origin feature/nueva-funcionalidad`
+5. Abre un Pull Request
 
 ---
 
-# Contributing
+## 📄 Licencia
 
-Pull requests and contributions are welcome.
-
-1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push branch
-5. Open Pull Request
+Este proyecto está licenciado bajo la [MIT License](LICENSE).
 
 ---
 
-# Acknowledgments
+<div align="center">
 
-- OpenRouter
-- OpenAI
-- LangChain
-- ChromaDB
-- Streamlit
-- Python community
+Desarrollado por **Carlos Fernando Paredes Riascos**  
+Universidad Cooperativa de Colombia · 2026
+
+</div>
